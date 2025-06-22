@@ -1,0 +1,52 @@
+/**
+ * Player list integration for MediaSoupVTT
+ */
+
+import { log } from '../utils/logger.js';
+
+export function setupPlayerListHooks() {
+    /**
+     * Hook into rendering the player list to add video elements.
+     */
+    Hooks.on('renderPlayerList', (playerListApp, html, _data) => {
+        const clientInstance = window.MediaSoupVTT_Client;
+        if (!clientInstance || !clientInstance.isConnected) {
+            // Clean up any existing video elements if not connected
+            html.find('.mediasoup-video-container').remove();
+            return;
+        }
+
+        log('Rendering player list. Updating A/V elements.', 'debug');
+
+        html.find('li.player').each((index, playerLiElement) => {
+            const playerLi = $(playerLiElement);
+            const userId = playerLi.data('user-id');
+            if (!userId) return;
+
+            // Remove old container first to ensure clean update
+            playerLi.find('.mediasoup-video-container').remove();
+
+            const userStreams = clientInstance.remoteUserStreams.get(userId);
+
+            if (userStreams && userStreams.videoTrack) {
+                log(`User ${userId} has a video track. Creating video element.`, 'debug');
+                const videoContainer = $('<div class="mediasoup-video-container"></div>');
+                const videoElement = $(`<video id="mediasoup-remote-video-${userId}" class="mediasoup-remote-video" autoplay playsinline muted></video>`);
+                
+                try {
+                    videoElement.get(0).srcObject = new MediaStream([userStreams.videoTrack]);
+                } catch (e) {
+                    log(`Error setting srcObject for user ${userId}: ${e.message}`, 'error');
+                }
+                
+                videoContainer.append(videoElement);
+                const playerNameElement = playerLi.find('.player-name');
+                if (playerNameElement.length) {
+                    playerNameElement.after(videoContainer);
+                } else {
+                    playerLi.append(videoContainer);
+                }
+            }
+        });
+    });
+}
