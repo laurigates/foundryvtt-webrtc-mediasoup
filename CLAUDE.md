@@ -1,0 +1,239 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository Overview
+
+This is a **FoundryVTT WebRTC plugin** that uses MediaSoup as an SFU (Selective Forwarding Unit) for real-time audio/video communication between players. The plugin enables server-side audio recording for external D&D helper applications while providing a complete A/V solution for tabletop gaming sessions.
+
+## Project Status
+
+**Properly Scaffolded** - The project has been reorganized into a modern modular structure with:
+
+- ✅ `module.json` manifest for FoundryVTT installation
+- ✅ `package.json` with npm scripts and dependencies
+- ✅ Rollup build system with ES modules
+- ✅ ESLint configuration for code quality
+- ✅ Modular architecture separating concerns
+- ✅ Complete documentation (README.md)
+- ⚠️ Core MediaSoupVTTClient needs full method implementations
+
+## Architecture
+
+### Project Structure
+
+```
+src/
+├── client/
+│   └── MediaSoupVTTClient.js    # Main WebRTC client logic
+├── constants/
+│   └── index.js                 # Module constants and message types
+├── ui/
+│   ├── settings.js              # Settings registration and hooks
+│   ├── sceneControls.js         # Scene controls integration
+│   ├── playerList.js            # Player list video integration
+│   └── styles.js                # CSS injection utilities
+├── utils/
+│   └── logger.js                # Logging utilities
+└── mediasoup-vtt.js             # Main entry point and Foundry hooks
+```
+
+### Core Components
+
+**`src/mediasoup-vtt.js`** - Main entry point containing:
+
+- Foundry hooks (init, ready)
+- Global client instance management
+- Auto-connection logic
+
+**`src/client/MediaSoupVTTClient.js`** - Core WebRTC client:
+
+- MediaSoup device and transport management
+- WebSocket signaling protocol implementation
+- Local media capture and streaming
+- Remote media consumption and display
+
+**`src/ui/`** - User interface integration:
+
+- Settings system with device enumeration
+- Scene controls for A/V buttons
+- Player list video element injection
+- CSS styling for video elements
+
+### Key Architecture Patterns
+
+**Signaling Protocol:**
+
+- WebSocket-based with request/response pattern using `requestIdCounter`
+- Message types defined in `SIG_MSG_TYPES` constant
+- Handles MediaSoup transport creation, producer/consumer lifecycle
+
+**Media Flow:**
+
+- **Local streams** → **Producers** → **Send Transport** → MediaSoup Server
+- MediaSoup Server → **Receive Transport** → **Consumers** → **Remote streams**
+- UI integration through FoundryVTT's scene controls and player list
+
+**State Management:**
+
+- `producers` Map: Local media streams (audio/video)
+- `consumers` Map: Remote media streams by consumer ID
+- `remoteUserStreams` Map: User-centric view of remote audio/video tracks
+
+## Development Commands
+
+### Build System
+
+The project now has a complete build system with Rollup and npm scripts:
+
+```bash
+# Development build with file watching
+npm run dev
+
+# Production build
+npm run build
+
+# Clean build directory
+npm run clean
+
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Create distribution package
+npm run package
+
+# Run tests (when implemented)
+npm test
+```
+
+### Setup Steps
+
+1. **Install Dependencies:**
+
+```bash
+npm install
+```
+
+2. **Build Module:**
+
+```bash
+npm run build
+```
+
+3. **Install in FoundryVTT:**
+
+```bash
+# Copy entire project to FoundryVTT modules directory
+cp -r /path/to/repo /foundrydata/Data/modules/mediasoup-vtt/
+```
+
+### MediaSoup Client Dependency
+
+The module expects `window.mediasoupClient` to be available. Options:
+
+- Include mediasoup-client in build (current external dependency)
+- Load via CDN in module.json
+- Bundle with Rollup (modify rollup.config.js external setting)
+
+### Testing Strategy
+
+**Manual Testing:**
+
+- Install module in FoundryVTT development instance
+- Configure MediaSoup server URL in module settings
+- Test A/V capture and streaming with multiple users
+
+**Required External Setup:**
+
+- MediaSoup server running on configurable endpoint
+- WebSocket connection (preferably WSS for production)
+- Modern browsers with WebRTC support
+
+## Key Implementation Details
+
+### Settings System
+
+Module uses FoundryVTT's settings API with keys:
+
+- `mediaSoupServerUrl`: WebSocket endpoint for MediaSoup server
+- `autoConnect`: Automatic connection on world load
+- `defaultAudioDevice`/`defaultVideoDevice`: Device preferences
+- `debugLogging`: Detailed console logging
+
+### UI Integration Points
+
+- **Scene Controls**: A/V toggle buttons for local media
+- **Player List**: Remote video display integration
+- **Settings Panel**: Module configuration interface
+- **Local Video**: Overlay preview of local camera feed
+
+### WebRTC Transport Management
+
+- **Send Transport**: For local media (producers)
+- **Receive Transport**: For remote media (consumers)
+- **Device**: MediaSoup device for RTP capabilities negotiation
+
+### Error Handling
+
+- WebSocket connection failures with reconnection logic
+- Media device access permissions and failures
+- MediaSoup server communication errors
+- Consumer/producer lifecycle error states
+
+## Critical Dependencies
+
+**External Libraries:**
+
+- `mediasoup-client`: WebRTC client library (loaded externally)
+- FoundryVTT API: Core platform integration
+
+**Browser Requirements:**
+
+- Modern WebRTC support (Chrome/Chromium recommended)
+- Microphone/camera permissions
+- WebSocket support
+
+**Server Requirements:**
+
+- Separate MediaSoup server implementation
+- WebSocket signaling endpoint
+- DTLS-SRTP for secure media transport
+
+## Development Priorities
+
+Based on TODO.md functional requirements, key areas needing attention:
+
+1. **Complete Client Implementation**: Finish MediaSoupVTTClient method implementations from original main.js
+2. **Connection Management**: Implement robust reconnection logic and error handling
+3. **Device Management**: Complete device enumeration and switching functionality
+4. **Testing Framework**: Add unit tests for MediaSoup client logic and UI components
+5. **Documentation**: Add JSDoc comments to all public methods and classes
+6. **Server Integration**: Test with actual MediaSoup server implementation
+
+## Security Considerations
+
+- WebSocket connections should use WSS in production
+- No sensitive data stored in client-side code
+- MediaSoup server handles DTLS-SRTP encryption
+- Proper CORS configuration required for server
+
+## Relevant Documentation
+
+- [FoundryVTT API](https://foundryvtt.com/api/)
+- [MediaSoup Documentation](https://github.com/versatica/mediasoup)
+- [MediaSoup Context7 Integration](https://context7.com/versatica/mediasoup)
+
+## Important Notes
+
+- Plugin designed for self-hosted MediaSoup servers (not cloud services)
+- Server-side audio recording capability is a key requirement driver
+- Replaces existing A/V solutions like avclient-livekit
+- Real-time communication requirements demand low-latency optimization
+
+## Memories
+
+- FoundryVTT client-side API documentation: https://foundryvtt.com/api/
+
