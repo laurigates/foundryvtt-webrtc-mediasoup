@@ -1,0 +1,52 @@
+{
+  "name": "foundryvtt-mediasoup-webrtc",
+  "version": "0.1.0",
+  "description": "WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU server",
+  "main": "dist/mediasoup-vtt.js",
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c",
+    "build:watch": "rollup -c --watch",
+    "dev": "npm run build:watch",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "clean": "rimraf dist/",
+    "package": "npm run build && npm run package:zip",
+    "package:zip": "zip -r mediasoup-vtt.zip module.json dist/ styles/ lang/ templates/ README.md",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "keywords": [
+    "foundryvtt",
+    "foundry-vtt",
+    "webrtc",
+    "mediasoup",
+    "audio",
+    "video",
+    "communication",
+    "tabletop",
+    "rpg"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "eslint": "^8.57.0",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.9.6"
+  },
+  "dependencies": {
+    "mediasoup-client": "^3.7.6"
+  },
+  "peerDependencies": {
+    "socket.io-client": "^4.7.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/foundryvtt-webrtc-mediasoup.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/foundryvtt-webrtc-mediasoup/issues"
+  },
+  "homepage": "https://github.com/yourusername/foundryvtt-webrtc-mediasoup#readme"
+}
