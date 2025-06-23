@@ -720,9 +720,25 @@ export class MediaSoupVTTClient {
         // Keeping as placeholder for interface compatibility
     }
 
-    _removeRemoteVideoElement(_userId) {
-        // This method is called but implementation is handled in UI modules
-        // Keeping as placeholder for interface compatibility
+    _removeRemoteVideoElement(userId) {
+        // Support both v12 and v13 player list structures
+        const playerSelectors = [
+            `#player-list li[data-user-id="${userId}"]`,
+            `#player-list .player[data-user-id="${userId}"]`,
+            `.players-list li[data-user-id="${userId}"]`,
+            `.players-list .player[data-user-id="${userId}"]`
+        ];
+        
+        for (const selector of playerSelectors) {
+            const playerLi = $(selector);
+            if (playerLi.length) {
+                playerLi.find('.mediasoup-video-container').remove();
+                break;
+            }
+        }
+        
+        // Also remove any standalone audio elements
+        $(`#mediasoup-consumer-audio-${userId}`).remove();
     }
 
     async _populateDeviceSettings() {
