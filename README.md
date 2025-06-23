@@ -16,7 +16,7 @@ A WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU (Se
 ## Requirements
 
 ### Client Requirements
-- FoundryVTT v10.291+ (verified up to v11.315)
+- FoundryVTT v10.291+ (verified up to v13.330)
 - Modern web browser with WebRTC support (Chrome/Chromium recommended)
 - Microphone and/or camera access permissions
 
@@ -175,6 +175,7 @@ Enable debug logging in module settings for detailed console output during troub
 - **Remote Media Handling**: Consumer management for remote audio/video streams  
 - **Signaling Protocol**: Complete WebSocket-based communication with MediaSoup server
 - **FoundryVTT Integration**: Scene controls, player list, and settings integration
+- **v13 Compatibility**: Enhanced player list integration with fallback support for v10-v13
 - **Build System**: Modern development workflow with linting and bundling
 - **Documentation**: Complete API documentation and setup guides
 
