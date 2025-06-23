@@ -16,7 +16,8 @@ This is a **FoundryVTT WebRTC plugin** that uses MediaSoup as an SFU (Selective 
 - ✅ ESLint configuration for code quality
 - ✅ Modular architecture separating concerns
 - ✅ Complete documentation (README.md)
-- ⚠️ Core MediaSoupVTTClient needs full method implementations
+- ✅ Core MediaSoupVTTClient fully implemented
+- ✅ FoundryVTT v13 compatibility with backward support to v10
 
 ## Architecture
 

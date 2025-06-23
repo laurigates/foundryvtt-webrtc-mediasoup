@@ -18,9 +18,22 @@ export function setupPlayerListHooks() {
 
         log('Rendering player list. Updating A/V elements.', 'debug');
 
-        html.find('li.player').each((index, playerLiElement) => {
-            const playerLi = $(playerLiElement);
-            const userId = playerLi.data('user-id');
+        // Support both v12 and v13 player list structures
+        const playerElements = html.find('li.player, .player');
+        playerElements.each((index, playerElement) => {
+            const playerLi = $(playerElement);
+            
+            // Try multiple ways to get userId for v13 compatibility
+            let userId = playerLi.data('user-id') || playerLi.data('userId') || playerLi.attr('data-user-id');
+            
+            // Fallback: look for user ID in nested elements or attributes
+            if (!userId) {
+                const userElement = playerLi.find('[data-user-id]').first();
+                if (userElement.length) {
+                    userId = userElement.data('user-id') || userElement.attr('data-user-id');
+                }
+            }
+            
             if (!userId) return;
 
             // Remove old container first to ensure clean update
@@ -40,10 +53,27 @@ export function setupPlayerListHooks() {
                 }
                 
                 videoContainer.append(videoElement);
-                const playerNameElement = playerLi.find('.player-name');
-                if (playerNameElement.length) {
-                    playerNameElement.after(videoContainer);
-                } else {
+                
+                // Try multiple insertion points for v13 compatibility
+                const insertionTargets = [
+                    playerLi.find('.player-name'),
+                    playerLi.find('.player-title'),
+                    playerLi.find('h3'),
+                    playerLi.find('.name'),
+                    playerLi.find('label')
+                ];
+                
+                let inserted = false;
+                for (const target of insertionTargets) {
+                    if (target.length) {
+                        target.after(videoContainer);
+                        inserted = true;
+                        break;
+                    }
+                }
+                
+                // Fallback: append to player element
+                if (!inserted) {
                     playerLi.append(videoContainer);
                 }
             }

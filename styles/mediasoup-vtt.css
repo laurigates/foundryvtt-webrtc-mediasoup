@@ -30,7 +30,17 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-#player-list .player .player-name {
+/* Support both v12 and v13 player list structures */
+#player-list .player .player-name,
+#player-list .player .player-title,
+#player-list .player h3,
+#player-list .player .name,
+#player-list .player label,
+.players-list .player .player-name,
+.players-list .player .player-title,
+.players-list .player h3,
+.players-list .player .name,
+.players-list .player label {
     position: relative;
     z-index: 1;
 }
