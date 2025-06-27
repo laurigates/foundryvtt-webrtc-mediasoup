@@ -2,7 +2,7 @@
   "id": "mediasoup-vtt",
   "title": "MediaSoupVTT",
   "description": "WebRTC audio/video communication for FoundryVTT using MediaSoup SFU server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "authors": [
     {
       "name": "Your Name",
@@ -34,8 +34,19 @@
   "bugs": "https://github.com/yourusername/foundryvtt-webrtc-mediasoup/issues",
   "flags": {
     "hotReload": {
-      "extensions": ["css", "hbs", "html", "json", "js"],
-      "paths": ["dist", "lang", "styles", "templates"]
+      "extensions": [
+        "css",
+        "hbs",
+        "html",
+        "json",
+        "js"
+      ],
+      "paths": [
+        "dist",
+        "lang",
+        "styles",
+        "templates"
+      ]
     }
   }
 }
