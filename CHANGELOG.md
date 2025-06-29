@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.4.1...v0.4.2) (2025-06-29)
+
+
+### Bug Fixes
+
+* include package-lock.json for reproducible builds ([#13](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/13)) ([e4e0ae2](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/e4e0ae25ca7762145144cf333e4ff1126059eb2f))
+
 ## [0.4.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.4.0...v0.4.1) (2025-06-29)
 
 
