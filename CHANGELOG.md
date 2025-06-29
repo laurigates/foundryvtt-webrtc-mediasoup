@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.4.0...v0.4.1) (2025-06-29)
+
+
+### Bug Fixes
+
+* process module template in workflow ([#11](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/11)) ([f1ea505](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/f1ea505cfc0347f5cf306025ac1301caee7ccbe8))
+
 ## [0.4.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.3.1...v0.4.0) (2025-06-29)
 
 
