@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.3.1...v0.4.0) (2025-06-29)
+
+
+### Features
+
+* add module.json templating system ([#9](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/9)) ([3595abb](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/3595abb56a89d096a5189d5b7e12f4ac40809105))
+
 ## [0.3.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.3.0...v0.3.1) (2025-06-29)
 
 
