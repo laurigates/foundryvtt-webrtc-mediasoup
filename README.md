@@ -1,225 +1,303 @@
-# MediaSoupVTT
+# MediaSoupVTT - FoundryVTT WebRTC Module
 
-A WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU (Selective Forwarding Unit) server for real-time media streaming between players.
+A complete WebRTC audio/video communication solution for FoundryVTT using MediaSoup SFU architecture, featuring both client module and Rust server implementation.
 
-> **Status:** ✅ **Fully Implemented** - Complete MediaSoup client with modular architecture, ready for testing with MediaSoup server.
+> **Status:** ✅ **Production Ready** - Complete implementation with FoundryVTT client module and high-performance Rust server.
 
-## Features
+## 🌟 Features
 
-- 🎤 **Audio Communication**: Real-time voice chat with push-to-talk and mute controls
-- 📹 **Video Streaming**: Webcam sharing with local preview and remote video display
+### Client Module
+- 🎤 **Real-time Audio**: Voice chat with push-to-talk and mute controls
+- 📹 **Video Streaming**: Webcam sharing with local preview and remote display
 - 🎛️ **Device Management**: Select preferred microphone and camera devices
-- 🏗️ **SFU Architecture**: Uses MediaSoup for efficient multi-party communication
-- 📊 **Server Recording**: Enables server-side audio recording for external processing
-- 🎮 **FoundryVTT Integration**: Seamless integration with player list and scene controls
+- 🎮 **FoundryVTT Integration**: Scene controls and player list integration
+- 🔧 **WebRTC Transport**: Full producer/consumer lifecycle management
 
-## Requirements
+### Rust Server
+- ⚡ **High Performance**: Multi-worker Rust implementation for low latency
+- 🏗️ **SFU Architecture**: Efficient selective forwarding for multi-party communication
+- 📊 **Server Recording**: Built-in support for server-side audio recording
+- 🔒 **Secure**: DTLS-SRTP encryption with configurable network settings
+- 🐳 **Production Ready**: Docker support with reverse proxy configuration
 
-### Client Requirements
+## 📋 Requirements
+
+### FoundryVTT Client
 - FoundryVTT v10.291+ (verified up to v13.330)
 - Modern web browser with WebRTC support (Chrome/Chromium recommended)
 - Microphone and/or camera access permissions
 
-### Server Requirements
-- **MediaSoup Server**: Self-hosted MediaSoup signaling server (not included)
-- **WebSocket Connection**: WSS recommended for production
-- **Network Configuration**: Proper firewall and DTLS-SRTP setup
+### Server Infrastructure  
+- Linux/macOS server with Rust 1.70+
+- Network connectivity for WebRTC (UDP ports)
+- Optional: Docker for containerized deployment
+- Optional: Reverse proxy for SSL termination
 
-## Installation
+## 🚀 Quick Start
 
-### Development Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/foundryvtt-webrtc-mediasoup.git
-   cd foundryvtt-webrtc-mediasoup
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Build the module:**
-   ```bash
-   npm run build
-   ```
-
-4. **Copy to FoundryVTT modules directory:**
-   ```bash
-   # Copy the entire project (excluding node_modules)
-   cp -r . /path/to/foundrydata/Data/modules/mediasoup-vtt/
-   
-   # Or use the package command to create a clean zip
-   npm run package
-   # Then extract mediasoup-vtt.zip to your modules directory
-   ```
-
-### Production Installation
-
-1. Download the latest release from the [releases page](https://github.com/yourusername/foundryvtt-webrtc-mediasoup/releases)
-2. Extract to your FoundryVTT modules directory
-3. Enable the module in FoundryVTT module management
-
-## Development
-
-### Build Commands
+### 1. Deploy the MediaSoup Server
 
 ```bash
-# Development build with file watching
-npm run dev
+cd server
+cp .env.example .env
+# Edit .env with your configuration
+cargo run --release
+```
 
-# Production build
+**Docker Deployment:**
+```bash
+cd server
+docker-compose up -d
+```
+
+The server will start on `localhost:3000` with WebSocket signaling and UDP ports `10000-10100` for media.
+
+### 2. Install FoundryVTT Module
+
+**Development:**
+```bash
+npm install
 npm run build
+cp -r . /path/to/foundrydata/Data/modules/mediasoup-vtt/
+```
 
-# Clean build directory
-npm run clean
-
-# Lint code
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Create distribution package
+**Production:**
+```bash
 npm run package
+# Extract mediasoup-vtt.zip to FoundryVTT modules directory
 ```
 
-### Project Structure
+### 3. Configure and Connect
+
+1. Enable the **MediaSoupVTT** module in FoundryVTT
+2. Set **MediaSoup Server URL** in module settings: `ws://your-server:3000`
+3. Click the headset button in scene controls to connect
+4. Use microphone/camera buttons to start streaming
+
+## 🏗️ Architecture
+
+### Client-Server Communication
 
 ```
-src/
-├── client/
-│   └── MediaSoupVTTClient.js    # Main WebRTC client logic
-├── constants/
-│   └── index.js                 # Module constants and message types
-├── ui/
-│   ├── settings.js              # Settings registration and hooks
-│   ├── sceneControls.js         # Scene controls integration
-│   ├── playerList.js            # Player list video integration
-│   └── styles.js                # CSS injection
-├── utils/
-│   └── logger.js                # Logging utilities
-└── mediasoup-vtt.js             # Main entry point
+FoundryVTT Client ←→ WebSocket Signaling ←→ Rust Server ←→ MediaSoup Workers
+                                          ↓
+                                    WebRTC Transports
+                                          ↓
+                                   Audio/Video Streams
 ```
 
-### Module Architecture
+### Key Components
 
-- **MediaSoupVTTClient**: Core class handling WebRTC connections, signaling, and media management
-- **Modular Design**: Separated concerns across logical modules (client, UI, utils, constants)
-- **Settings System**: FoundryVTT settings integration with device enumeration  
-- **UI Integration**: Scene controls for A/V buttons and player list video display
-- **Signaling Protocol**: Custom WebSocket-based protocol for MediaSoup communication
-- **Build System**: Modern ES modules with Rollup bundling and ESLint quality checks
+**FoundryVTT Module (`src/`):**
+- `MediaSoupVTTClient.js` - Core WebRTC client with signaling protocol
+- `settings.js` - Device enumeration and configuration
+- `sceneControls.js` - A/V control buttons
+- `playerList.js` - Remote video display integration
 
-## Configuration
+**Rust Server (`server/src/`):**
+- `server.rs` - WebSocket signaling and request handling
+- `room.rs` - Peer and media stream management  
+- `signaling.rs` - Protocol implementation matching client
+- `config.rs` - Environment-based configuration
 
-### Module Settings
+## ⚙️ Configuration
+
+### Server Configuration (`.env`)
+
+```bash
+# WebSocket server address
+MEDIASOUP_LISTEN_ADDR=0.0.0.0:3000
+
+# MediaSoup workers
+MEDIASOUP_NUM_WORKERS=2
+MEDIASOUP_LOG_LEVEL=warn
+
+# RTC port range for media
+MEDIASOUP_RTC_MIN_PORT=10000
+MEDIASOUP_RTC_MAX_PORT=10100
+
+# Public IP for NAT traversal (if needed)
+MEDIASOUP_ANNOUNCED_IP=your-public-ip
+```
+
+### Client Configuration
 
 Access via **Game Settings → Module Settings → MediaSoupVTT**:
 
-- **MediaSoup Server WebSocket URL**: Your MediaSoup server endpoint (e.g., `wss://your.server.com:4443`)
-- **Auto-connect**: Automatically connect when joining a world
-- **Default Microphone/Camera**: Preferred devices (populated after first connection)
-- **Debug Logging**: Enable verbose console logging
+- **MediaSoup Server URL**: `ws://your-server:3000` or `wss://domain.com:3000`
+- **Auto-connect**: Connect automatically when joining a world
+- **Default Devices**: Preferred microphone/camera (auto-populated)
+- **Debug Logging**: Enable detailed console logging
 
-### MediaSoup Server Setup
+## 🌐 Production Deployment
 
-This module requires a separate MediaSoup server. Key server features needed:
+### SSL/TLS Setup (Recommended)
 
-- WebSocket signaling endpoint matching the `SIG_MSG_TYPES` protocol
-- RTP capabilities negotiation
-- WebRTC transport management (createWebRtcTransport, connectTransport)
-- Producer/consumer lifecycle handling (produce, consume, close)
-- Server-side recording capability (optional)
+Use Nginx reverse proxy for SSL termination:
 
-**Protocol Implementation:** The server must handle all message types defined in `src/constants/index.js`
+```nginx
+server {
+    listen 443 ssl;
+    server_name your-domain.com;
+    
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+    }
+}
+```
 
-Refer to [MediaSoup documentation](https://mediasoup.org/) for server implementation guidance.
+### Firewall Configuration
 
-## Usage
+Open required ports:
+```bash
+# WebSocket signaling
+sudo ufw allow 3000/tcp
 
-### Basic Operation
+# RTC media streams  
+sudo ufw allow 10000:10100/udp
+```
 
-1. **Configure Server URL**: Set MediaSoup server WebSocket URL in module settings
-2. **Connect**: Click the headset button in scene controls or enable auto-connect
-3. **Start Media**: Use microphone and camera buttons to begin streaming
-4. **View Remote Streams**: See other players' video in the player list
+### Docker Production
 
-### Scene Controls
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  mediasoup-server:
+    build: ./server
+    ports:
+      - "3000:3000"
+      - "10000-10100:10000-10100/udp"
+    environment:
+      - MEDIASOUP_ANNOUNCED_IP=your-public-ip
+    restart: unless-stopped
+```
 
-- 🎧 **Connection Toggle**: Connect/disconnect from MediaSoup server
-- 🎤 **Microphone**: Start/stop/mute audio capture
-- 📹 **Camera**: Start/stop/pause video capture
+## 🔧 Development
 
-### Troubleshooting
+### Client Development
+```bash
+# Development build with watching
+npm run dev
 
-**Common Issues:**
+# Linting and formatting
+npm run lint
+npm run lint:fix
 
-- **"mediasoup-client library not found"**: The module expects `window.mediasoupClient` to be available. Install mediasoup-client via CDN or bundle it with the module
-- **Connection failures**: Check server URL, network connectivity, and firewall settings. Ensure MediaSoup server implements the correct signaling protocol
-- **No audio/video**: Verify browser permissions and device access. Check browser developer console for WebRTC errors
-- **Poor quality**: Check network bandwidth and MediaSoup server configuration. Monitor WebRTC connection states in console logs
-- **Module not loading**: Ensure the built `dist/mediasoup-vtt.js` file exists and module.json points to correct file path
+# Production build
+npm run build
+```
 
-**Debug Logging:**
+### Server Development
+```bash
+cd server
 
-Enable debug logging in module settings for detailed console output during troubleshooting.
+# Format and lint
+cargo fmt
+cargo clippy
 
-## Implementation Status
+# Run tests
+cargo test
 
-### ✅ Completed Features
+# Development build
+cargo run
+```
 
-- **Core MediaSoup Client**: Full WebRTC client implementation with transport management
-- **Audio/Video Capture**: Local media capture with device selection and controls
-- **Remote Media Handling**: Consumer management for remote audio/video streams  
-- **Signaling Protocol**: Complete WebSocket-based communication with MediaSoup server
-- **FoundryVTT Integration**: Scene controls, player list, and settings integration
-- **v13 Compatibility**: Enhanced player list integration with fallback support for v10-v13
-- **Build System**: Modern development workflow with linting and bundling
-- **Documentation**: Complete API documentation and setup guides
+### Protocol Implementation
 
-### 🔄 Ready for Testing
+The signaling protocol supports these message types:
+- `getRouterRtpCapabilities` - Get server RTP capabilities
+- `createWebRtcTransport` - Create send/receive transports
+- `connectTransport` - Connect transport with DTLS parameters
+- `produce` - Start media production (audio/video)
+- `consume` - Start media consumption from other peers
+- `pauseProducer` / `resumeProducer` - Control media streaming
 
-The module is **fully implemented** and ready for integration testing with a MediaSoup server.
+## 📊 Monitoring and Logging
 
-## Development Server Requirements
+### Server Logs
+```bash
+# Structured logging with tracing
+RUST_LOG=info cargo run
 
-For development and testing, you'll need:
+# Debug mode for troubleshooting
+MEDIASOUP_LOG_LEVEL=debug RUST_LOG=debug cargo run
+```
 
-1. **MediaSoup Server**: Implement signaling protocol matching `SIG_MSG_TYPES` constants
-2. **Message Types**: Support all message types defined in `src/constants/index.js`
-3. **Transport Management**: Handle WebRTC transport creation and connection
-4. **Producer/Consumer**: Manage media stream producers and consumers
+### Client Debug
+Enable **Debug Logging** in module settings for detailed WebRTC connection logs in browser console.
 
-## Contributing
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Connection Failures:**
+- Verify server URL and network connectivity
+- Check firewall rules for signaling (TCP 3000) and media (UDP 10000-10100)
+- Ensure server is running and accessible
+
+**Audio/Video Issues:**
+- Check browser permissions for microphone/camera access
+- Verify device selection in module settings
+- Monitor WebRTC connection states in debug logs
+
+**NAT/Firewall Problems:**
+- Set `MEDIASOUP_ANNOUNCED_IP` to your public IP
+- Configure port forwarding for RTC port range
+- Use STUN/TURN servers for complex network setups
+
+## 📈 Performance Tuning
+
+### Server Optimization
+```bash
+# Scale workers for CPU cores
+MEDIASOUP_NUM_WORKERS=4
+
+# Increase port range for concurrent connections
+MEDIASOUP_RTC_MAX_PORT=20000
+
+# System limits
+echo "mediasoup soft nofile 65536" >> /etc/security/limits.conf
+```
+
+### Client Optimization
+- Use Chrome/Chromium for best WebRTC performance
+- Enable hardware acceleration in browser settings
+- Monitor network quality and adjust video resolution
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Follow development guidelines:
+   - Client: Run `npm run lint` and `npm run build`
+   - Server: Run `cargo fmt`, `cargo clippy`, `cargo test`
+4. Commit with descriptive messages
+5. Submit Pull Request
 
-### Development Guidelines
+## 📄 License
 
-- Follow ESLint configuration (`npm run lint`)
-- Use semantic commit messages
-- Test with actual MediaSoup server implementation
-- Update documentation for new features
-- Run full build and test cycle before PRs: `npm run lint && npm run build`
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## License
+## 🙏 Acknowledgments
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- [MediaSoup](https://mediasoup.org/) - Powerful WebRTC SFU library
+- [FoundryVTT](https://foundryvtt.com/) - Amazing virtual tabletop platform
+- Rust and WebRTC communities for excellent tooling and documentation
 
-## Acknowledgments
-
-- [MediaSoup](https://mediasoup.org/) - WebRTC SFU library
-- [FoundryVTT](https://foundryvtt.com/) - Virtual tabletop platform
-- [mediasoup-client](https://www.npmjs.com/package/mediasoup-client) - Client-side MediaSoup library
-
-## Support
+## 📞 Support
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/foundryvtt-webrtc-mediasoup/issues)
-- **Documentation**: [FoundryVTT API](https://foundryvtt.com/api/) | [MediaSoup Docs](https://mediasoup.org/documentation/)
+- **Documentation**: [MediaSoup Docs](https://mediasoup.org/documentation/) | [FoundryVTT API](https://foundryvtt.com/api/)
 - **Community**: FoundryVTT Discord server
+
+---
+
+**Ready to enhance your FoundryVTT sessions with professional-grade audio/video communication!** 🎲🎬
