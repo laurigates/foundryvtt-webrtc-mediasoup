@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.2.0...v0.3.0) (2025-06-29)
+
+
+### Features
+
+* add comprehensive MediaSoup configuration interface ([#4](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/4)) ([8a0ee00](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/8a0ee00a96f1d15a14572a82d954c53a5d2136e7))
+
 ## [0.2.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.1.0...v0.2.0) (2025-06-26)
 
 
