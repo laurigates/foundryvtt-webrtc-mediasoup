@@ -15,12 +15,8 @@
     "verified": "13.330",
     "maximum": "13"
   },
-  "esmodules": [
-    "dist/mediasoup-vtt.js"
-  ],
-  "styles": [
-    "styles/mediasoup-vtt.css"
-  ],
+  "esmodules": ["dist/mediasoup-vtt.js"],
+  "styles": ["styles/mediasoup-vtt.css"],
   "languages": [
     {
       "lang": "en",
@@ -50,3 +46,4 @@
     }
   }
 }
+
