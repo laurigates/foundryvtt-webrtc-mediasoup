@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.3.0...v0.3.1) (2025-06-29)
+
+
+### Bug Fixes
+
+* improve release automation and installation instructions ([#6](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/6)) ([6c803b5](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/6c803b5777471251cc0b529bbd48ee0367b76d44))
+
 ## [0.3.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.2.0...v0.3.0) (2025-06-29)
 
 
