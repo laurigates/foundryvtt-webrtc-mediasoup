@@ -9,7 +9,7 @@
           "jsonpath": "$.version"
         }
       ],
-      "release-notes-header": "## FoundryVTT Installation\n\nTo install this module in FoundryVTT:\n\n1. Open FoundryVTT and navigate to **Add-on Modules**\n2. Click **Install Module**\n3. Paste this manifest URL: `https://github.com/yourusername/foundryvtt-webrtc-mediasoup/releases/latest/download/module.json`\n4. Click **Install**\n\nAlternatively, download the latest release and extract it to your FoundryVTT modules directory.\n\n---\n"
+      "release-notes-header": "## FoundryVTT Installation\n\nTo install this module in FoundryVTT:\n\n1. Open FoundryVTT and navigate to **Add-on Modules**\n2. Click **Install Module**\n3. Paste this manifest URL: `https://github.com/laurigates/foundryvtt-webrtc-mediasoup/releases/latest/download/module.json`\n4. Click **Install**\n\nAlternatively, download the latest release and extract it to your FoundryVTT modules directory.\n\n---\n"
     }
   }
 }
