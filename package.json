@@ -1,6 +1,6 @@
 {
   "name": "foundryvtt-mediasoup-webrtc",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU server",
   "main": "dist/mediasoup-vtt.js",
   "type": "module",
@@ -11,8 +11,9 @@
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "clean": "rimraf dist/",
+    "process-template": "node scripts/process-template.cjs",
     "package": "npm run build && npm run package:zip",
-    "package:zip": "zip -r mediasoup-vtt.zip module.json dist/ styles/ lang/ templates/ README.md",
+    "package:zip": "zip -r mediasoup-vtt.zip dist/module.json dist/mediasoup-vtt.js styles/ lang/ templates/ README.md",
     "test": "echo \"No tests specified yet\" && exit 0"
   },
   "keywords": [
