@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.5.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.5.0...v0.5.1) (2025-06-30)
+
+
+### Bug Fixes
+
+* ensure module.json is templated into dist before packaging ([#20](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/20)) ([db93ca1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/db93ca1c3949ac8c8fcc8fb4af503ab0a781a631))
+
 ## [0.5.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.4.3...v0.5.0) (2025-06-30)
 
 
