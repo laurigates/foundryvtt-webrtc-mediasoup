@@ -16,6 +16,14 @@ import { injectStyles } from './ui/styles.js';
 // Expose mediasoup-client to global scope for FoundryVTT compatibility
 window.mediasoupClient = mediasoupClient;
 
+// Debug: Log mediasoup-client availability immediately
+console.log('MediaSoupVTT: mediasoup-client assigned to window:', {
+    available: !!window.mediasoupClient,
+    version: window.mediasoupClient?.version,
+    hasDevice: !!window.mediasoupClient?.Device,
+    exports: window.mediasoupClient ? Object.keys(window.mediasoupClient) : []
+});
+
 // Global instance of our client
 let mediaSoupVTTClientInstance = null;
 
