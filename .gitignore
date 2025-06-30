@@ -25,5 +25,9 @@ Thumbs.db
 .env
 .env.local
 
+# Test results
+test-results/
+tests/results/
+
 # Rust build artifacts
 server/target/
