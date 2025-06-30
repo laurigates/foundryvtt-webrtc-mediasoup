@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.4.3](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.4.2...v0.4.3) (2025-06-30)
+
+
+### Bug Fixes
+
+* include module.json in package zip and improve installation docs ([#15](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/15)) ([afca0fa](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/afca0fa92ebceb5256c125cd43050d178aa09326))
+
 ## [0.4.2](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.4.1...v0.4.2) (2025-06-29)
 
 
