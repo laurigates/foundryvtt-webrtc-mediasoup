@@ -1,5 +1,3 @@
-Okay, here's a requirements specification for your FoundryVTT MediaSoup A/V Plugin, presented in Markdown.
-
 # **FoundryVTT MediaSoup A/V Plugin \- Requirements Specification**
 
 **Version:** 0.1 **Date:** May 22, 2025 **Project Goal:** To create a FoundryVTT module that provides audio and video communication for players using a self-hosted MediaSoup server, replacing existing A/V solutions and enabling server-side audio recording for external processing.
@@ -179,5 +177,3 @@ While the MediaSoup server is outside the scope of this client plugin's requirem
 * Functionality to create and manage MediaSoup rooms, workers, routers, and transports.  
 * Capability to receive RTP streams from clients.  
 * **The critical capability to record incoming audio RTP streams (e.g., by piping them to FFmpeg or GStreamer) and save them as audio files accessible by the external D\&D helper application.**
-
-This specification should provide a solid foundation for the development of your MediaSoupVTT plugin.
