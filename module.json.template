@@ -17,6 +17,9 @@
     "verified": "13.330",
     "maximum": "13"
   },
+  "scripts": [
+    "https://unpkg.com/mediasoup-client@3/lib/mediasoup-client.js"
+  ],
   "esmodules": [
     "mediasoup-vtt.js"
   ],
