@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.5.2](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.5.1...v0.5.2) (2025-06-30)
+
+
+### Bug Fixes
+
+* module URL duplicate username ([#22](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/22)) ([b77c535](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/b77c5352511eba92b231ff992439ae68d7fa79a1))
+
 ## [0.5.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/v0.5.0...v0.5.1) (2025-06-30)
 
 
