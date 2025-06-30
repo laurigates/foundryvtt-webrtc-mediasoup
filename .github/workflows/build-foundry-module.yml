@@ -3,7 +3,7 @@ name: Build FoundryVTT Module
 on:
   push:
     tags:
-      - 'foundryvtt-webrtc-mediasoup-v*.*.*'
+      - 'foundryvtt-mediasoup-webrtc-v*.*.*'
 
 permissions:
   contents: write
