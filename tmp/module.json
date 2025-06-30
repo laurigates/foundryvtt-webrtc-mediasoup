@@ -2,7 +2,7 @@
   "id": "mediasoup-vtt",
   "title": "MediaSoupVTT",
   "description": "WebRTC audio/video communication for FoundryVTT using MediaSoup SFU server. Includes comprehensive configuration interface and setup guide.",
-  "version": "0.4.3",
+  "version": "0.3.0",
   "authors": [
     {
       "name": "Lauri Gates",
@@ -18,7 +18,7 @@
     "maximum": "13"
   },
   "esmodules": [
-    "dist/mediasoup-vtt.js"
+    "mediasoup-vtt.js"
   ],
   "styles": [
     "styles/mediasoup-vtt.css"
@@ -46,7 +46,7 @@
         "js"
       ],
       "paths": [
-        "dist",
+        ".",
         "lang",
         "styles",
         "templates"

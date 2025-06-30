@@ -1,9 +1,50 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import { createRequire } from 'module';
+import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { join, dirname } from 'path';
 
 const require = createRequire(import.meta.url);
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Copy assets plugin
+function copyAssetsPlugin() {
+  function copyRecursive(src, dest) {
+    try {
+      const stat = statSync(src);
+      if (stat.isDirectory()) {
+        mkdirSync(dest, { recursive: true });
+        const items = readdirSync(src);
+        for (const item of items) {
+          copyRecursive(join(src, item), join(dest, item));
+        }
+      } else {
+        mkdirSync(dirname(dest), { recursive: true });
+        copyFileSync(src, dest);
+      }
+    } catch (error) {
+      console.error(`Error copying ${src} to ${dest}:`, error);
+    }
+  }
+
+  return {
+    name: 'copy-assets',
+    buildStart() {
+      // Copy static assets to dist/
+      const assetDirs = ['styles', 'lang', 'templates'];
+      for (const dir of assetDirs) {
+        copyRecursive(dir, join('dist', dir));
+      }
+      
+      // Copy README.md
+      try {
+        copyFileSync('README.md', 'dist/README.md');
+      } catch (error) {
+        console.error('Error copying README.md:', error);
+      }
+    }
+  };
+}
 
 // Template processing plugin
 function templatePlugin() {
@@ -35,6 +76,7 @@ export default {
     sourcemap: !isProduction
   },
   plugins: [
+    copyAssetsPlugin(),
     nodeResolve(),
     templatePlugin(),
     isProduction && terser({
