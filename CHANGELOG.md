@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.2](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.1...foundryvtt-mediasoup-webrtc-v0.7.2) (2025-06-30)
+
+
+### Bug Fixes
+
+* add missing mediasoup-client dependency to module.json ([#31](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/31)) ([cdc1495](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/cdc1495df8908066c5a3f117f51a8777b9e7671d))
+
 ## [0.7.1](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.0...foundryvtt-mediasoup-webrtc-v0.7.1) (2025-06-30)
 
 
