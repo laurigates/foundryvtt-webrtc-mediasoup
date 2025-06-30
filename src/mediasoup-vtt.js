@@ -35,49 +35,14 @@ Hooks.once('init', () => {
 Hooks.once('ready', async () => {
     log('Foundry VTT is ready. MediaSoupVTT is active.', 'info', true);
     
-    // Wait for mediasoup-client to be available (it might still be loading)
-    let retryCount = 0;
-    const maxRetries = 10;
-    
-    while (!window.mediasoupClient && retryCount < maxRetries) {
-        log(`Waiting for mediasoup-client library... (attempt ${retryCount + 1}/${maxRetries})`, 'info');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        retryCount++;
-    }
-    
+    // mediasoup-client should now be bundled with the plugin
     if (!window.mediasoupClient) {
-        log('mediasoup-client library was not found after waiting. Attempting to load from CDN...', 'warn');
-        
-        try {
-            // Try to load mediasoup-client dynamically
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://unpkg.com/mediasoup-client@3.7.6/lib/mediasoup-client.js';
-                script.onload = () => {
-                    log('mediasoup-client loaded successfully from CDN', 'info');
-                    resolve();
-                };
-                script.onerror = (error) => {
-                    log('Failed to load mediasoup-client from CDN', 'error');
-                    reject(error);
-                };
-                document.head.appendChild(script);
-            });
-            
-            // Wait a bit for the library to initialize
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-        } catch (error) {
-            log('Failed to dynamically load mediasoup-client', 'error');
-        }
-    }
-    
-    if (!window.mediasoupClient) {
-        ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library was not found. Plugin will not function. Please check your internet connection or try reloading.`, { permanent: true });
+        ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library was not found. Plugin bundle may be corrupted.`, { permanent: true });
+        log('mediasoup-client library not found. This should not happen with bundled version.', 'error');
         return;
     }
     
-    log('mediasoup-client library confirmed available', 'info');
+    log('mediasoup-client library is available', 'info');
 
     // Create global client instance
     mediaSoupVTTClientInstance = new MediaSoupVTTClient();

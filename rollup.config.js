@@ -84,5 +84,6 @@ export default {
       keep_fnames: true
     })
   ].filter(Boolean),
-  external: ['mediasoup-client']
+  // Bundle mediasoup-client instead of treating it as external
+  // external: ['mediasoup-client']
 };
