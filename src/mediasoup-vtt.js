@@ -4,6 +4,7 @@
  * A WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU server
  */
 
+import mediasoupClient from 'mediasoup-client';
 import { MODULE_ID, MODULE_TITLE, SETTING_AUTO_CONNECT } from './constants/index.js';
 import { log } from './utils/logger.js';
 import { MediaSoupVTTClient } from './client/MediaSoupVTTClient.js';
@@ -11,6 +12,9 @@ import { registerSettings, setupSettingsHooks } from './ui/settings.js';
 import { setupSceneControls } from './ui/sceneControls.js';
 import { setupPlayerListHooks } from './ui/playerList.js';
 import { injectStyles } from './ui/styles.js';
+
+// Expose mediasoup-client to global scope for FoundryVTT compatibility
+window.mediasoupClient = mediasoupClient;
 
 // Global instance of our client
 let mediaSoupVTTClientInstance = null;

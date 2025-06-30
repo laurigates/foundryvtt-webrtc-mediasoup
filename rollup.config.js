@@ -1,4 +1,5 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import { createRequire } from 'module';
 import { copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
@@ -78,6 +79,7 @@ export default {
   plugins: [
     copyAssetsPlugin(),
     nodeResolve(),
+    commonjs(),
     templatePlugin(),
     isProduction && terser({
       keep_classnames: true,
