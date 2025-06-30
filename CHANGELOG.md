@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.6.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/foundryvtt-mediasoup-webrtc-v0.6.0...foundryvtt-mediasoup-webrtc-v0.6.1) (2025-06-30)
+
+
+### Bug Fixes
+
+* **package-build:** update trigger tag ([#26](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/26)) ([800f017](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/800f017087af778850d6a2e6d9019957918094f6))
+
 ## [0.6.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/foundryvtt-mediasoup-webrtc-v0.5.2...foundryvtt-mediasoup-webrtc-v0.6.0) (2025-06-30)
 
 
