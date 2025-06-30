@@ -5,7 +5,14 @@
 import { MODULE_ID, LOG_PREFIX, SETTING_DEBUG_LOGGING } from '../constants/index.js';
 
 export function log(message, level = 'info', force = false) {
-    const settingDebug = game.settings.get(MODULE_ID, SETTING_DEBUG_LOGGING);
+    // Safe setting access - fallback to false if setting not yet registered
+    let settingDebug = false;
+    try {
+        settingDebug = game.settings.get(MODULE_ID, SETTING_DEBUG_LOGGING);
+    } catch (error) {
+        // Setting not yet registered, use default
+        settingDebug = false;
+    }
     if (level === 'debug' && !settingDebug && !force) return;
     
     const timestamp = new Date().toLocaleTimeString();
