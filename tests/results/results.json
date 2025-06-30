@@ -1,0 +1,215 @@
+{
+  "config": {
+    "configFile": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/playwright.config.js",
+    "rootDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/setup/global-setup.js",
+    "globalTeardown": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/setup/global-teardown.js",
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFolder": "tests/results/html-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "tests/results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "tests/results/junit.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium-webrtc",
+        "name": "chromium-webrtc",
+        "testDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs",
+        "testIgnore": [
+          "tests/integration/fixtures/**",
+          "tests/integration/setup/**"
+        ],
+        "testMatch": [
+          "tests/integration/specs/**/*.spec.js",
+          "tests/integration/specs/**/*.test.js"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox-webrtc",
+        "name": "firefox-webrtc",
+        "testDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs",
+        "testIgnore": [
+          "tests/integration/fixtures/**",
+          "tests/integration/setup/**"
+        ],
+        "testMatch": [
+          "tests/integration/specs/**/*.spec.js",
+          "tests/integration/specs/**/*.test.js"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit-webrtc",
+        "name": "webkit-webrtc",
+        "testDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs",
+        "testIgnore": [
+          "tests/integration/fixtures/**",
+          "tests/integration/setup/**"
+        ],
+        "testMatch": [
+          "tests/integration/specs/**/*.spec.js",
+          "tests/integration/specs/**/*.test.js"
+        ],
+        "timeout": 120000
+      },
+      {
+        "outputDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs",
+        "testIgnore": [
+          "tests/integration/fixtures/**",
+          "tests/integration/setup/**"
+        ],
+        "testMatch": [
+          "tests/integration/specs/**/*.spec.js",
+          "tests/integration/specs/**/*.test.js"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.53.1",
+    "workers": 7,
+    "webServer": {
+      "command": "python3 -m http.server 3000",
+      "port": 3000,
+      "cwd": ".",
+      "reuseExistingServer": true,
+      "timeout": 10000
+    }
+  },
+  "suites": [
+    {
+      "title": "plugin-loading.spec.js",
+      "file": "plugin-loading.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "MediaSoup Plugin Loading",
+          "file": "plugin-loading.spec.js",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load mediasoup-client library when needed",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium-webrtc",
+                  "projectName": "chromium-webrtc",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 0,
+                      "error": {
+                        "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window\n<launched> pid=8300\nCall log:\n\u001b[2m  - <launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=8300\u001b[22m\n",
+                        "stack": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window\n<launched> pid=8300\nCall log:\n\u001b[2m  - <launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=8300\u001b[22m\n"
+                      },
+                      "errors": [
+                        {
+                          "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window\n<launched> pid=8300\nCall log:\n\u001b[2m  - <launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=8300\u001b[22m\n"
+                        },
+                        {
+                          "location": {
+                            "file": "/Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs/plugin-loading.spec.js",
+                            "column": 16,
+                            "line": 27
+                          },
+                          "message": "TypeError: Cannot read properties of undefined (reading 'close')\n\n  25 |   \n  26 |   test.afterEach(async () => {\n> 27 |     await page.close();\n     |                ^\n  28 |   });\n  29 |   \n  30 |   test('should load mock FoundryVTT environment correctly', async () => {\n    at /Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs/plugin-loading.spec.js:27:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-06-30T16:03:29.268Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "75c0301581b7a3bf2d7d-df09ad5dc3fd4b8976c5",
+              "file": "plugin-loading.spec.js",
+              "line": 49,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-06-30T16:02:57.838Z",
+    "duration": 37068.452000000005,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

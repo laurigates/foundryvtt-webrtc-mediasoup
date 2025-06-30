@@ -18,7 +18,7 @@
     "maximum": "13"
   },
   "scripts": [
-    "https://unpkg.com/mediasoup-client@3/lib/mediasoup-client.js"
+    "https://unpkg.com/mediasoup-client@3.7.6/lib/mediasoup-client.js"
   ],
   "esmodules": [
     "mediasoup-vtt.js"

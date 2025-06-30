@@ -1,0 +1,31 @@
+<testsuites id="" name="" tests="1" failures="1" skipped="0" errors="0" time="37.06845200000001">
+<testsuite name="plugin-loading.spec.js" timestamp="2025-06-30T16:03:29.027Z" hostname="chromium-webrtc" tests="1" failures="1" skipped="0" time="0" errors="0">
+<testcase name="MediaSoup Plugin Loading › should load mediasoup-client library when needed" classname="plugin-loading.spec.js" time="0">
+<failure message="plugin-loading.spec.js:49:3 should load mediasoup-client library when needed" type="FAILURE">
+<![CDATA[  [chromium-webrtc] › plugin-loading.spec.js:49:3 › MediaSoup Plugin Loading › should load mediasoup-client library when needed 
+
+    Error: browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window
+    <launched> pid=8300
+    Call log:
+      - <launching> /Users/lgates/Library/Caches/ms-playwright/chromium-1179/chrome-mac/Chromium.app/Contents/MacOS/Chromium --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-extensions --disable-features=AcceptCHFrame,AutoExpandDetailsElement,AvoidUnnecessaryBeforeUnloadCheckSync,CertificateTransparencyComponentUpdater,DestroyProfileOnBrowserClose,DialMediaRouteProvider,ExtensionManifestV2Disabled,GlobalMediaControls,HttpsUpgrades,ImprovedCookieControls,LazyFrameLoading,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --enable-automation --enable-use-zoom-for-dsf=false --no-sandbox --use-fake-ui-for-media-stream --use-fake-device-for-media-stream --use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m --use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav --allow-file-access-from-files --disable-web-security --allow-running-insecure-content --auto-accept-camera-and-microphone-capture --auto-select-desktop-capture-source=Test --disable-features=VizDisplayCompositor --disable-backgrounding-occluded-windows --disable-background-timer-throttling --disable-renderer-backgrounding --disable-ipc-flooding-protection --user-data-dir=/var/folders/jx/zjyzknj16h7c7sc0prspdk7r0000gp/T/playwright_chromiumdev_profile-MgWgci --remote-debugging-pipe --no-startup-window
+      - <launched> pid=8300
+
+
+    TypeError: Cannot read properties of undefined (reading 'close')
+
+      25 |   
+      26 |   test.afterEach(async () => {
+    > 27 |     await page.close();
+         |                ^
+      28 |   });
+      29 |   
+      30 |   test('should load mock FoundryVTT environment correctly', async () => {
+        at /Users/lgates/repos/foundryvtt-webrtc-mediasoup/tests/integration/specs/plugin-loading.spec.js:27:16
+]]>
+</failure>
+</testcase>
+</testsuite>
+</testsuites>
