@@ -1,6 +1,14 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.3](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.2...foundryvtt-mediasoup-webrtc-v0.7.3) (2025-06-30)
+
+
+### Bug Fixes
+
+* correct settings menu registration for configuration dialog ([#35](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/35)) ([62c5b14](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/62c5b142e01c09ad265d0d0a187222669edfcb9a))
+* prevent logger from accessing unregistered settings ([2887264](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/2887264a7ff2db30a03c7d62df461fe789324835))
+
 ## [0.7.2](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.1...foundryvtt-mediasoup-webrtc-v0.7.2) (2025-06-30)
 
 
