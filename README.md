@@ -2,8 +2,6 @@
 
 A complete WebRTC audio/video communication solution for FoundryVTT using MediaSoup SFU architecture, featuring both client module and Rust server implementation.
 
-> **Status:** ✅ **Production Ready** - Complete implementation with FoundryVTT client module and high-performance Rust server.
-
 ## 🌟 Features
 
 ### Client Module
