@@ -1,6 +1,35 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/foundryvtt-mediasoup-webrtc-v0.6.1...foundryvtt-mediasoup-webrtc-v0.7.0) (2025-06-30)
+
+
+### Features
+
+* add comprehensive MediaSoup configuration interface ([#4](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/4)) ([fecc5f0](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/fecc5f0b4f9412e0ffa65082dd8ed0a5c2e3b5f6))
+* add core module structure and utilities ([e276e53](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/e276e53488a77d894deb514bcdf41cbf144190c5))
+* add FoundryVTT UI integration modules ([9315425](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/9315425da3c86cd942fa66c85aa970e4cf255666))
+* add FoundryVTT v13 compatibility support ([81ce317](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/81ce31741601906d4ab9104c0cb156f610420675))
+* add FoundryVTT v13 compatibility support ([c277952](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/c277952bad015eff756ee9f6b909aa6a42cbe790))
+* add module.json templating system ([#9](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/9)) ([9dc8f83](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/9dc8f83a0c5f8d012303aade01b1713bb4461cf4))
+* add project infrastructure and build system ([cd9ada2](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/cd9ada2355b01cba6a78857c4aecc3e5f80f66f1))
+* add supporting assets and localization ([1af1b32](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/1af1b32c7d316935832b90f91885ad432e9006e2))
+* implement complete MediaSoup WebRTC client ([bd26136](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/bd26136e56db9fc2033739adc175131205aea0bc))
+
+
+### Bug Fixes
+
+* ensure module.json is templated into dist before packaging ([#20](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/20)) ([db93ca1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/db93ca1c3949ac8c8fcc8fb4af503ab0a781a631))
+* improve release automation and installation instructions ([#6](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/6)) ([59853b9](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/59853b90bea4d950025afcd416f22964abb6611d))
+* include module.json in package zip and improve installation docs ([#15](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/15)) ([f0a1247](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/f0a12471531388a8fe14cdfde09efecbb1d552f5))
+* include package-lock.json for reproducible builds ([#13](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/13)) ([f046e05](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/f046e05ec248ba2eb5f6f9fa30b7d2c3281a5fca))
+* module URL duplicate username ([#22](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/22)) ([b77c535](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/b77c5352511eba92b231ff992439ae68d7fa79a1))
+* **package-build:** update trigger tag ([#26](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/26)) ([800f017](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/800f017087af778850d6a2e6d9019957918094f6))
+* process module template in workflow ([#11](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/11)) ([44ff123](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/44ff123c54e52a4e91be563cb89ac79e2559b483))
+* **release-please:** change release-type ([#24](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/issues/24)) ([82e899c](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/82e899c42346afb8d7dd93f930b468bf6020203f))
+* remove server/target/ from tracking and add to .gitignore ([1fefea7](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/1fefea764272ded102a6def4cded71ae075c802e))
+* restructure module packaging to use dist-only contents ([96c9dcd](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/commit/96c9dcd64dfed9b0e5d1430991957779b35747a8))
+
 ## [0.6.1](https://github.com/laurigates/foundryvtt-webrtc-mediasoup/compare/foundryvtt-mediasoup-webrtc-v0.6.0...foundryvtt-mediasoup-webrtc-v0.6.1) (2025-06-30)
 
 
