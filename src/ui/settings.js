@@ -8,7 +8,7 @@ import {
     SETTING_DEFAULT_AUDIO_DEVICE, SETTING_DEFAULT_VIDEO_DEVICE
 } from '../constants/index.js';
 import { log } from '../utils/logger.js';
-import { showConfigDialog } from './configDialog.js';
+import { MediaSoupConfigDialog } from './configDialog.js';
 
 export function registerSettings() {
     // Configuration dialog button
@@ -17,8 +17,8 @@ export function registerSettings() {
         label: 'Configure MediaSoup Server',
         hint: 'Open the comprehensive configuration dialog with setup instructions.',
         icon: 'fas fa-cogs',
-        type: 'button',
-        onClick: () => showConfigDialog()
+        type: MediaSoupConfigDialog,
+        restricted: false
     });
 
     game.settings.register(MODULE_ID, SETTING_DEBUG_LOGGING, {
