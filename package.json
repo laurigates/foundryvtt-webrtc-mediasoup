@@ -1,6 +1,6 @@
 {
   "name": "foundryvtt-mediasoup-webrtc",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU server",
   "main": "dist/mediasoup-vtt.js",
   "type": "module",

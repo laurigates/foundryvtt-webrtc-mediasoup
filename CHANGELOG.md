@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.4](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.3...foundryvtt-mediasoup-webrtc-v0.7.4) (2025-06-30)
+
+
+### Bug Fixes
+
+* resolve mediasoup-client loading issues with comprehensive testing framework ([#36](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/36)) ([151fb69](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/151fb6997239f8fa971fcfa17e9c40cf3ac66c19))
+
 ## [0.7.3](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.2...foundryvtt-mediasoup-webrtc-v0.7.3) (2025-06-30)
 
 
