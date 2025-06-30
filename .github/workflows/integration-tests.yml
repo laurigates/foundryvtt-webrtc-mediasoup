@@ -1,0 +1,287 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # Run Rust server tests first
+  server-tests:
+    name: MediaSoup Server Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Cache Rust dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          server/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('server/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+    
+    - name: Run server tests
+      run: |
+        cd server
+        cargo test --verbose
+        
+    - name: Build server for integration tests
+      run: |
+        cd server  
+        cargo build --release
+
+  # Browser-based integration tests
+  integration-tests:
+    name: Browser Integration Tests
+    runs-on: ubuntu-latest
+    needs: server-tests
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build plugin
+      run: npm run build
+      
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps ${{ matrix.browser }}
+      
+    - name: Start test servers
+      run: |
+        # Start HTTP server for test files
+        python3 -m http.server 3000 &
+        echo $! > http_server.pid
+        
+        # Wait for HTTP server
+        timeout 30 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done'
+        
+        # Start MediaSoup server if available
+        if [ -f server/target/release/mediasoup-server ]; then
+          cd server
+          RUST_LOG=warn ./target/release/mediasoup-server &
+          echo $! > ../mediasoup_server.pid
+          cd ..
+          
+          # Wait for MediaSoup server
+          timeout 30 bash -c 'until nc -z localhost 4443; do sleep 1; done' || true
+        fi
+      
+    - name: Run integration tests
+      run: npx playwright test --project=${{ matrix.browser }}-webrtc --reporter=github
+      env:
+        CI: true
+        WEBRTC_DEBUG: false
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-results-${{ matrix.browser }}
+        path: |
+          tests/results/
+          test-results/
+        retention-days: 30
+        
+    - name: Stop servers
+      if: always()
+      run: |
+        # Stop HTTP server
+        if [ -f http_server.pid ]; then
+          kill $(cat http_server.pid) || true
+          rm http_server.pid
+        fi
+        
+        # Stop MediaSoup server
+        if [ -f mediasoup_server.pid ]; then
+          kill $(cat mediasoup_server.pid) || true
+          rm mediasoup_server.pid
+        fi
+
+  # Docker-based full integration tests
+  docker-integration:
+    name: Docker Integration Tests
+    runs-on: ubuntu-latest
+    needs: server-tests
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Build and test with Docker Compose
+      run: |
+        docker-compose -f docker-compose.test.yml build
+        docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from playwright-tests
+      env:
+        CI: true
+        
+    - name: Collect test artifacts from container
+      if: always()
+      run: |
+        # Create results directory
+        mkdir -p test-results-docker
+        
+        # Copy results from container if it exists
+        docker-compose -f docker-compose.test.yml ps -q playwright-tests | xargs -I {} docker cp {}:/app/tests/results ./test-results-docker/ || true
+        
+    - name: Upload Docker test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: docker-integration-results
+        path: test-results-docker/
+        retention-days: 30
+        
+    - name: Cleanup
+      if: always()
+      run: docker-compose -f docker-compose.test.yml down -v
+
+  # Smoke tests for different environments
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18, 20]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Lint code
+      run: npm run lint
+      
+    - name: Build plugin
+      run: npm run build
+      
+    - name: Verify build output
+      run: |
+        test -f dist/mediasoup-vtt.js
+        test -f dist/module.json
+        
+    - name: Install Playwright (Chromium only for smoke test)
+      run: npx playwright install chromium
+      
+    - name: Run basic smoke tests
+      run: npx playwright test tests/integration/specs/plugin-loading.spec.js --project=chromium-webrtc
+      env:
+        CI: true
+
+  # Security and dependency checks
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run npm audit
+      run: npm audit --audit-level=moderate
+      
+    - name: Check for known vulnerabilities
+      run: npx audit-ci --moderate
+      
+    - name: Install Rust for server audit
+      if: hashFiles('server/Cargo.toml') != ''
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Audit Rust dependencies
+      if: hashFiles('server/Cargo.toml') != ''
+      run: |
+        cd server
+        cargo install cargo-audit
+        cargo audit
+
+  # Generate and publish test report
+  test-report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs: [integration-tests, docker-integration, smoke-tests]
+    if: always()
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      
+    - name: Generate test report
+      run: |
+        echo "# MediaSoup Integration Test Report" > test-report.md
+        echo "" >> test-report.md
+        echo "## Test Results Summary" >> test-report.md
+        echo "" >> test-report.md
+        
+        # Count test files and results
+        if [ -d playwright-results-chromium ]; then
+          echo "- ✅ Chromium tests completed" >> test-report.md
+        else
+          echo "- ❌ Chromium tests failed" >> test-report.md
+        fi
+        
+        if [ -d playwright-results-firefox ]; then
+          echo "- ✅ Firefox tests completed" >> test-report.md
+        else
+          echo "- ❌ Firefox tests failed" >> test-report.md
+        fi
+        
+        if [ -d docker-integration-results ]; then
+          echo "- ✅ Docker integration tests completed" >> test-report.md
+        else
+          echo "- ❌ Docker integration tests failed" >> test-report.md
+        fi
+        
+        echo "" >> test-report.md
+        echo "## Test Coverage" >> test-report.md
+        echo "- Plugin loading and initialization" >> test-report.md
+        echo "- Settings configuration and management" >> test-report.md
+        echo "- WebSocket server connection" >> test-report.md
+        echo "- WebRTC media capture and streaming" >> test-report.md
+        echo "- Browser compatibility (Chromium, Firefox)" >> test-report.md
+        
+    - name: Upload test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-report
+        path: test-report.md
+        retention-days: 90

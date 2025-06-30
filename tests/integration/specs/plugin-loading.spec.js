@@ -1,0 +1,241 @@
+import { test, expect } from '@playwright/test';
+
+/**
+ * Plugin Loading Tests
+ * 
+ * Tests the basic initialization and loading of the MediaSoup plugin
+ * in a mock FoundryVTT environment.
+ */
+
+test.describe('MediaSoup Plugin Loading', () => {
+  let page;
+  
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+    
+    // Navigate to test sandbox
+    await page.goto('/tests/integration/setup/test-sandbox.html');
+    
+    // Wait for mock environment to initialize
+    await page.waitForFunction(() => window.testSandbox && window.game);
+    
+    // Verify mock environment is ready
+    await expect(page.locator('#test-status')).toContainText('Ready for testing');
+  });
+  
+  test.afterEach(async () => {
+    await page.close();
+  });
+  
+  test('should load mock FoundryVTT environment correctly', async () => {
+    // Check that mock objects are available
+    const mockObjects = await page.evaluate(() => ({
+      hasGame: !!window.game,
+      hasUI: !!window.ui,
+      hasHooks: !!window.Hooks,
+      hasJQuery: !!window.$,
+      gameVersion: window.game?.version,
+      userId: window.game?.userId
+    }));
+    
+    expect(mockObjects.hasGame).toBeTruthy();
+    expect(mockObjects.hasUI).toBeTruthy();
+    expect(mockObjects.hasHooks).toBeTruthy();
+    expect(mockObjects.hasJQuery).toBeTruthy();
+    expect(mockObjects.gameVersion).toBe('13.330');
+    expect(mockObjects.userId).toBe('test-user-123');
+  });
+  
+  test('should load mediasoup-client library when needed', async () => {
+    // Initially should not be loaded
+    const initialState = await page.evaluate(() => !!window.mediasoupClient);
+    expect(initialState).toBeFalsy();
+    
+    // Click initialize plugin - this should load mediasoup-client first
+    await page.click('#btn-init-plugin');
+    
+    // Wait for library to load
+    await page.waitForFunction(() => window.mediasoupClient, { timeout: 10000 });
+    
+    // Check that library is now available
+    const hasMediaSoupClient = await page.evaluate(() => !!window.mediasoupClient);
+    expect(hasMediaSoupClient).toBeTruthy();
+    
+    // Check basic mediasoup-client functionality
+    const mediasoupVersion = await page.evaluate(() => {
+      try {
+        const device = new window.mediasoupClient.Device();
+        return { hasDevice: true, loaded: device.loaded };
+      } catch (error) {
+        return { hasDevice: false, error: error.message };
+      }
+    });
+    
+    expect(mediasoupVersion.hasDevice).toBeTruthy();
+    expect(mediasoupVersion.loaded).toBeFalsy(); // Should not be loaded initially
+  });
+  
+  test('should initialize plugin successfully', async () => {
+    // Click the initialize plugin button
+    await page.click('#btn-init-plugin');
+    
+    // Wait for plugin initialization
+    await page.waitForFunction(
+      () => window.MediaSoupVTT_Client && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient',
+      { timeout: 10000 }
+    );
+    
+    // Check plugin status
+    await expect(page.locator('#test-status')).toContainText('Plugin initialized', { timeout: 15000 });
+    
+    // Verify client instance is created
+    const clientInfo = await page.evaluate(() => ({
+      hasClient: !!window.MediaSoupVTT_Client,
+      isConnected: window.MediaSoupVTT_Client?.isConnected,
+      isConnecting: window.MediaSoupVTT_Client?.isConnecting,
+      serverUrl: window.MediaSoupVTT_Client?.serverUrl
+    }));
+    
+    expect(clientInfo.hasClient).toBeTruthy();
+    expect(clientInfo.isConnected).toBeFalsy();
+    expect(clientInfo.isConnecting).toBeFalsy();
+  });
+  
+  test('should register settings correctly', async () => {
+    // Initialize plugin
+    await page.click('#btn-init-plugin');
+    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    
+    // Get registered settings
+    const settings = await page.evaluate(() => {
+      return window.game.settings.getAllSettings().filter(setting => 
+        setting.key.startsWith('mediasoup-vtt.')
+      );
+    });
+    
+    // Check that expected settings are registered
+    const settingKeys = settings.map(s => s.key);
+    expect(settingKeys).toContain('mediasoup-vtt.debugLogging');
+    expect(settingKeys).toContain('mediasoup-vtt.mediaSoupServerUrl');
+    expect(settingKeys).toContain('mediasoup-vtt.autoConnect');
+    expect(settingKeys).toContain('mediasoup-vtt.defaultAudioDevice');
+    expect(settingKeys).toContain('mediasoup-vtt.defaultVideoDevice');
+    
+    // Verify setting types and defaults
+    const debugSetting = settings.find(s => s.key === 'mediasoup-vtt.debugLogging');
+    expect(debugSetting.type).toBe(Boolean);
+    expect(debugSetting.value).toBe(false);
+    
+    const urlSetting = settings.find(s => s.key === 'mediasoup-vtt.mediaSoupServerUrl');
+    expect(urlSetting.type).toBe(String);
+    expect(urlSetting.value).toBe('');
+  });
+  
+  test('should register settings menu correctly', async () => {
+    // Initialize plugin
+    await page.click('#btn-init-plugin');
+    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    
+    // Get registered menus
+    const menus = await page.evaluate(() => {
+      return window.game.settings.getAllMenus().filter(menu => 
+        menu.key.startsWith('mediasoup-vtt.')
+      );
+    });
+    
+    // Check that config dialog menu is registered
+    expect(menus).toHaveLength(1);
+    expect(menus[0].key).toBe('mediasoup-vtt.configDialog');
+    expect(menus[0].name).toBe('MediaSoup Server Configuration');
+    expect(menus[0].type).toBeDefined();
+  });
+  
+  test('should handle lifecycle hooks correctly', async () => {
+    // Track hook calls
+    await page.evaluate(() => {
+      window.testHookCalls = [];
+      const originalCall = window.Hooks.call;
+      window.Hooks.call = function(event, ...args) {
+        window.testHookCalls.push({ event, args: args.length });
+        return originalCall.call(this, event, ...args);
+      };
+    });
+    
+    // Initialize plugin
+    await page.click('#btn-init-plugin');
+    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    
+    // Wait for lifecycle to complete
+    await page.waitForTimeout(1000);
+    
+    // Check that expected hooks were called
+    const hookCalls = await page.evaluate(() => window.testHookCalls);
+    const hookEvents = hookCalls.map(call => call.event);
+    
+    expect(hookEvents).toContain('init');
+    expect(hookEvents).toContain('ready');
+  });
+  
+  test('should show appropriate notifications', async () => {
+    // Clear any existing notifications
+    await page.evaluate(() => window.ui.notifications.clear());
+    
+    // Initialize plugin
+    await page.click('#btn-init-plugin');
+    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    
+    // Wait for notifications
+    await page.waitForTimeout(2000);
+    
+    // Check notifications
+    const notifications = await page.evaluate(() => 
+      window.ui.notifications.getAll()
+    );
+    
+    // Should have some notifications (at least about mediasoup-client being available)
+    expect(notifications.length).toBeGreaterThan(0);
+    
+    // Look for specific expected notifications
+    const messages = notifications.map(n => n.message);
+    expect(messages.some(msg => msg.includes('MediaSoupVTT'))).toBeTruthy();
+  });
+  
+  test('should log initialization messages', async () => {
+    // Monitor console logs
+    const logs = [];
+    page.on('console', msg => {
+      if (msg.type() === 'log' || msg.type() === 'info') {
+        logs.push(msg.text());
+      }
+    });
+    
+    // Initialize plugin
+    await page.click('#btn-init-plugin');
+    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    
+    // Wait for logs
+    await page.waitForTimeout(1000);
+    
+    // Check for expected log messages
+    const logText = logs.join(' ');
+    expect(logText).toContain('MediaSoupVTT');
+    expect(logText).toContain('Initializing');
+  });
+  
+  test('should handle mediasoup-client loading failure gracefully', async () => {
+    // Mock fetch to fail for mediasoup-client CDN
+    await page.route('**/mediasoup-client*', route => {
+      route.abort('failed');
+    });
+    
+    // Initialize plugin
+    await page.click('#btn-init-plugin');
+    
+    // Should show error status due to loading failure
+    await expect(page.locator('#test-status')).toContainText('Initialization failed', { timeout: 10000 });
+    
+    // Should have logged the error
+    const logEntries = await page.locator('.test-log .log-entry.error').count();
+    expect(logEntries).toBeGreaterThan(0);
+  });
+});
