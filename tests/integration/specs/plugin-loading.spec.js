@@ -46,23 +46,31 @@ test.describe('MediaSoup Plugin Loading', () => {
     expect(mockObjects.userId).toBe('test-user-123');
   });
   
-  test('should load mediasoup-client library when needed', async () => {
-    // Initially should not be loaded
+  test('should load bundled mediasoup-client library', async () => {
+    // Initially should not be loaded (before plugin initialization)
     const initialState = await page.evaluate(() => !!window.mediasoupClient);
     expect(initialState).toBeFalsy();
     
-    // Click initialize plugin - this should load mediasoup-client first
+    // Click initialize plugin - this should load the bundled plugin with mediasoup-client
     await page.click('#btn-init-plugin');
     
-    // Wait for library to load
+    // Wait for bundled library to be exposed
     await page.waitForFunction(() => window.mediasoupClient, { timeout: 10000 });
     
-    // Check that library is now available
-    const hasMediaSoupClient = await page.evaluate(() => !!window.mediasoupClient);
-    expect(hasMediaSoupClient).toBeTruthy();
+    // Check that bundled library is now available
+    const mediasoupInfo = await page.evaluate(() => ({
+      hasMediaSoupClient: !!window.mediasoupClient,
+      version: window.mediasoupClient?.version,
+      exports: window.mediasoupClient ? Object.keys(window.mediasoupClient) : []
+    }));
+    
+    expect(mediasoupInfo.hasMediaSoupClient).toBeTruthy();
+    expect(mediasoupInfo.version).toBe('3.11.0');
+    expect(mediasoupInfo.exports).toContain('Device');
+    expect(mediasoupInfo.exports).toContain('detectDevice');
     
     // Check basic mediasoup-client functionality
-    const mediasoupVersion = await page.evaluate(() => {
+    const deviceTest = await page.evaluate(() => {
       try {
         const device = new window.mediasoupClient.Device();
         return { hasDevice: true, loaded: device.loaded };
@@ -71,8 +79,8 @@ test.describe('MediaSoup Plugin Loading', () => {
       }
     });
     
-    expect(mediasoupVersion.hasDevice).toBeTruthy();
-    expect(mediasoupVersion.loaded).toBeFalsy(); // Should not be loaded initially
+    expect(deviceTest.hasDevice).toBeTruthy();
+    expect(deviceTest.loaded).toBeFalsy(); // Should not be loaded initially
   });
   
   test('should initialize plugin successfully', async () => {
@@ -222,9 +230,9 @@ test.describe('MediaSoup Plugin Loading', () => {
     expect(logText).toContain('Initializing');
   });
   
-  test('should handle mediasoup-client loading failure gracefully', async () => {
-    // Mock fetch to fail for mediasoup-client CDN
-    await page.route('**/mediasoup-client*', route => {
+  test('should handle corrupted plugin bundle gracefully', async () => {
+    // Mock the plugin bundle to fail loading
+    await page.route('**/mediasoup-vtt.js', route => {
       route.abort('failed');
     });
     
@@ -232,7 +240,7 @@ test.describe('MediaSoup Plugin Loading', () => {
     await page.click('#btn-init-plugin');
     
     // Should show error status due to loading failure
-    await expect(page.locator('#test-status')).toContainText('Initialization failed', { timeout: 10000 });
+    await expect(page.locator('#test-status')).toContainText('Plugin load failed', { timeout: 10000 });
     
     // Should have logged the error
     const logEntries = await page.locator('.test-log .log-entry.error').count();

@@ -314,42 +314,23 @@
             updateStatus('Loading plugin...', '#f39c12');
             
             try {
-                // Check if mediasoup-client is loaded
-                if (!window.mediasoupClient) {
-                    addLogEntry('info', 'Loading mediasoup-client library...');
-                    
-                    // Load mediasoup-client first
-                    await new Promise((resolve, reject) => {
-                        const mediasoupScript = document.createElement('script');
-                        mediasoupScript.src = 'https://unpkg.com/mediasoup-client@3.7.6/lib/mediasoup-client.js';
-                        mediasoupScript.onload = () => {
-                            addLogEntry('info', 'mediasoup-client library loaded');
-                            resolve();
-                        };
-                        mediasoupScript.onerror = (error) => {
-                            addLogEntry('error', 'Failed to load mediasoup-client', error);
-                            reject(error);
-                        };
-                        document.head.appendChild(mediasoupScript);
-                    });
-                    
-                    // Wait a bit for library to initialize
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+                addLogEntry('info', 'Loading plugin with bundled mediasoup-client...');
                 
-                // Verify mediasoup-client is available
-                if (!window.mediasoupClient) {
-                    throw new Error('mediasoup-client library failed to load');
-                }
-                
-                addLogEntry('info', 'mediasoup-client confirmed available');
-                
-                // Load the built plugin
+                // Load the built plugin (which now includes bundled mediasoup-client)
                 const script = document.createElement('script');
                 script.type = 'module';
                 script.src = '../../../dist/mediasoup-vtt.js';
                 script.onload = () => {
                     addLogEntry('info', 'Plugin script loaded');
+                    
+                    // Check if mediasoup-client is now available
+                    if (window.mediasoupClient) {
+                        addLogEntry('info', `mediasoup-client bundled successfully (version: ${window.mediasoupClient.version})`);
+                        addLogEntry('info', `Available exports: ${Object.keys(window.mediasoupClient).join(', ')}`);
+                    } else {
+                        addLogEntry('error', 'mediasoup-client not found after loading bundled plugin');
+                    }
+                    
                     // Trigger FoundryVTT lifecycle
                     triggerFoundryLifecycle();
                     updateStatus('Plugin initialized', '#27ae60');
