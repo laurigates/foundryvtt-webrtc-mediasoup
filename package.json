@@ -5,15 +5,15 @@
   "main": "dist/mediasoup-vtt.js",
   "type": "module",
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && npm run process-template",
     "build:watch": "rollup -c --watch",
     "dev": "npm run build:watch",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "clean": "rimraf dist/",
     "process-template": "node scripts/process-template.cjs",
-    "package": "npm run build && npm run package:zip",
-    "package:zip": "zip -r mediasoup-vtt.zip dist/module.json dist/mediasoup-vtt.js styles/ lang/ templates/ README.md",
+    "package": "npm run build && npm run process-template && npm run package:zip",
+    "package:zip": "cp dist/module.json . && zip -r mediasoup-vtt.zip module.json dist/mediasoup-vtt.js styles/ lang/ templates/ README.md",
     "test": "echo \"No tests specified yet\" && exit 0"
   },
   "keywords": [

@@ -54,17 +54,30 @@ The server will start on `localhost:3000` with WebSocket signaling and UDP ports
 
 ### 2. Install FoundryVTT Module
 
-**Development:**
+**Easy Installation (Recommended):**
+
+1. Open FoundryVTT and navigate to **Game Settings → Modules**
+2. Click **Install Module**
+3. Paste this manifest URL into the **Manifest URL** field:
+   ```
+   https://github.com/laurigates/foundryvtt-webrtc-mediasoup/releases/latest/download/module.json
+   ```
+4. Click **Install** and wait for the download to complete
+
+**Manual Installation:**
+```bash
+# Download the latest release
+wget https://github.com/laurigates/foundryvtt-webrtc-mediasoup/releases/latest/download/mediasoup-vtt.zip
+
+# Extract to FoundryVTT modules directory
+unzip mediasoup-vtt.zip -d /path/to/foundrydata/Data/modules/mediasoup-vtt/
+```
+
+**Development Build:**
 ```bash
 npm install
 npm run build
 cp -r . /path/to/foundrydata/Data/modules/mediasoup-vtt/
-```
-
-**Production:**
-```bash
-npm run package
-# Extract mediasoup-vtt.zip to FoundryVTT modules directory
 ```
 
 ### 3. Configure and Connect
@@ -78,12 +91,45 @@ npm run package
 
 ### Client-Server Communication
 
-```
-FoundryVTT Client ←→ WebSocket Signaling ←→ Rust Server ←→ MediaSoup Workers
-                                          ↓
-                                    WebRTC Transports
-                                          ↓
-                                   Audio/Video Streams
+```mermaid
+graph TB
+    subgraph "FoundryVTT Client"
+        A[MediaSoupVTTClient.js]
+        B[Scene Controls]
+        C[Player List UI]
+        D[Local Media]
+    end
+    
+    subgraph "Network Layer"
+        E[WebSocket Signaling]
+        F[WebRTC Transports]
+    end
+    
+    subgraph "Rust Server"
+        G[WebSocket Handler]
+        H[Room Manager]
+        I[MediaSoup Router]
+    end
+    
+    subgraph "MediaSoup Workers"
+        J[Worker 1]
+        K[Worker 2]
+        L[Worker N]
+    end
+    
+    A -->|Control Messages| E
+    E -->|Signaling Protocol| G
+    G --> H
+    H --> I
+    I --> J
+    I --> K
+    I --> L
+    
+    D -->|Audio/Video| F
+    F -->|RTP Streams| I
+    
+    B -.->|User Actions| A
+    C -.->|Display Remote| A
 ```
 
 ### Key Components
