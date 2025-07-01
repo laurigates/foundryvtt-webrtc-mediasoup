@@ -5,6 +5,7 @@ A complete WebRTC audio/video communication solution for FoundryVTT using MediaS
 ## 🌟 Features
 
 ### Client Module
+
 - 🎤 **Real-time Audio**: Voice chat with push-to-talk and mute controls
 - 📹 **Video Streaming**: Webcam sharing with local preview and remote display
 - 🎛️ **Device Management**: Select preferred microphone and camera devices
@@ -12,6 +13,7 @@ A complete WebRTC audio/video communication solution for FoundryVTT using MediaS
 - 🔧 **WebRTC Transport**: Full producer/consumer lifecycle management
 
 ### Rust Server
+
 - ⚡ **High Performance**: Multi-worker Rust implementation for low latency
 - 🏗️ **SFU Architecture**: Efficient selective forwarding for multi-party communication
 - 📊 **Server Recording**: Built-in support for server-side audio recording
@@ -21,11 +23,13 @@ A complete WebRTC audio/video communication solution for FoundryVTT using MediaS
 ## 📋 Requirements
 
 ### FoundryVTT Client
+
 - FoundryVTT v10.291+ (verified up to v13.330)
 - Modern web browser with WebRTC support (Chrome/Chromium recommended)
 - Microphone and/or camera access permissions
 
-### Server Infrastructure  
+### Server Infrastructure
+
 - Linux/macOS server with Rust 1.70+
 - Network connectivity for WebRTC (UDP ports)
 - Optional: Docker for containerized deployment
@@ -43,6 +47,7 @@ cargo run --release
 ```
 
 **Docker Deployment:**
+
 ```bash
 cd server
 docker-compose up -d
@@ -58,20 +63,22 @@ The server will start on `localhost:3000` with WebSocket signaling and UDP ports
 2. Click **Install Module**
 3. Paste this manifest URL into the **Manifest URL** field:
    ```
-   https://github.com/laurigates/foundryvtt-webrtc-mediasoup/releases/latest/download/module.json
+   https://github.com/laurigates/foundryvtt-mediasoup-webrtc/releases/latest/download/module.json
    ```
 4. Click **Install** and wait for the download to complete
 
 **Manual Installation:**
+
 ```bash
 # Download the latest release
-wget https://github.com/laurigates/foundryvtt-webrtc-mediasoup/releases/latest/download/mediasoup-vtt.zip
+wget https://github.com/laurigates/foundryvtt-mediasoup-webrtc/releases/latest/download/mediasoup-vtt.zip
 
 # Extract to FoundryVTT modules directory
 unzip mediasoup-vtt.zip -d /path/to/foundrydata/Data/modules/mediasoup-vtt/
 ```
 
 **Development Build:**
+
 ```bash
 npm install
 npm run build
@@ -97,24 +104,24 @@ graph TB
         C[Player List UI]
         D[Local Media]
     end
-    
+
     subgraph "Network Layer"
         E[WebSocket Signaling]
         F[WebRTC Transports]
     end
-    
+
     subgraph "Rust Server"
         G[WebSocket Handler]
         H[Room Manager]
         I[MediaSoup Router]
     end
-    
+
     subgraph "MediaSoup Workers"
         J[Worker 1]
         K[Worker 2]
         L[Worker N]
     end
-    
+
     A -->|Control Messages| E
     E -->|Signaling Protocol| G
     G --> H
@@ -122,10 +129,10 @@ graph TB
     I --> J
     I --> K
     I --> L
-    
+
     D -->|Audio/Video| F
     F -->|RTP Streams| I
-    
+
     B -.->|User Actions| A
     C -.->|Display Remote| A
 ```
@@ -133,14 +140,16 @@ graph TB
 ### Key Components
 
 **FoundryVTT Module (`src/`):**
+
 - `MediaSoupVTTClient.js` - Core WebRTC client with signaling protocol
 - `settings.js` - Device enumeration and configuration
 - `sceneControls.js` - A/V control buttons
 - `playerList.js` - Remote video display integration
 
 **Rust Server (`server/src/`):**
+
 - `server.rs` - WebSocket signaling and request handling
-- `room.rs` - Peer and media stream management  
+- `room.rs` - Peer and media stream management
 - `signaling.rs` - Protocol implementation matching client
 - `config.rs` - Environment-based configuration
 
@@ -183,10 +192,10 @@ Use Nginx reverse proxy for SSL termination:
 server {
     listen 443 ssl;
     server_name your-domain.com;
-    
+
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
-    
+
     location / {
         proxy_pass http://127.0.0.1:3000;
         proxy_http_version 1.1;
@@ -200,11 +209,12 @@ server {
 ### Firewall Configuration
 
 Open required ports:
+
 ```bash
 # WebSocket signaling
 sudo ufw allow 3000/tcp
 
-# RTC media streams  
+# RTC media streams
 sudo ufw allow 10000:10100/udp
 ```
 
@@ -212,7 +222,7 @@ sudo ufw allow 10000:10100/udp
 
 ```yaml
 # docker-compose.yml
-version: '3.8'
+version: "3.8"
 services:
   mediasoup-server:
     build: ./server
@@ -227,6 +237,7 @@ services:
 ## 🔧 Development
 
 ### Client Development
+
 ```bash
 # Development build with watching
 npm run dev
@@ -240,6 +251,7 @@ npm run build
 ```
 
 ### Server Development
+
 ```bash
 cd server
 
@@ -257,6 +269,7 @@ cargo run
 ### Protocol Implementation
 
 The signaling protocol supports these message types:
+
 - `getRouterRtpCapabilities` - Get server RTP capabilities
 - `createWebRtcTransport` - Create send/receive transports
 - `connectTransport` - Connect transport with DTLS parameters
@@ -267,6 +280,7 @@ The signaling protocol supports these message types:
 ## 📊 Monitoring and Logging
 
 ### Server Logs
+
 ```bash
 # Structured logging with tracing
 RUST_LOG=info cargo run
@@ -276,6 +290,7 @@ MEDIASOUP_LOG_LEVEL=debug RUST_LOG=debug cargo run
 ```
 
 ### Client Debug
+
 Enable **Debug Logging** in module settings for detailed WebRTC connection logs in browser console.
 
 ## 🐛 Troubleshooting
@@ -283,16 +298,19 @@ Enable **Debug Logging** in module settings for detailed WebRTC connection logs 
 ### Common Issues
 
 **Connection Failures:**
+
 - Verify server URL and network connectivity
 - Check firewall rules for signaling (TCP 3000) and media (UDP 10000-10100)
 - Ensure server is running and accessible
 
 **Audio/Video Issues:**
+
 - Check browser permissions for microphone/camera access
 - Verify device selection in module settings
 - Monitor WebRTC connection states in debug logs
 
 **NAT/Firewall Problems:**
+
 - Set `MEDIASOUP_ANNOUNCED_IP` to your public IP
 - Configure port forwarding for RTC port range
 - Use STUN/TURN servers for complex network setups
@@ -300,6 +318,7 @@ Enable **Debug Logging** in module settings for detailed WebRTC connection logs 
 ## 📈 Performance Tuning
 
 ### Server Optimization
+
 ```bash
 # Scale workers for CPU cores
 MEDIASOUP_NUM_WORKERS=4
@@ -312,6 +331,7 @@ echo "mediasoup soft nofile 65536" >> /etc/security/limits.conf
 ```
 
 ### Client Optimization
+
 - Use Chrome/Chromium for best WebRTC performance
 - Enable hardware acceleration in browser settings
 - Monitor network quality and adjust video resolution
@@ -338,7 +358,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/foundryvtt-webrtc-mediasoup/issues)
+- **Issues**: [GitHub Issues](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues)
 - **Documentation**: [MediaSoup Docs](https://mediasoup.org/documentation/) | [FoundryVTT API](https://foundryvtt.com/api/)
 - **Community**: FoundryVTT Discord server
 
