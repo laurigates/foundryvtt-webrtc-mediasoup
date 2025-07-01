@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.10](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.9...foundryvtt-mediasoup-webrtc-v0.7.10) (2025-07-01)
+
+
+### Bug Fixes
+
+* resolve ESLint line ending errors in GitHub Actions ([#46](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/46)) ([b063b16](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/b063b1680302fc1801b8c3d003b110cad27d4652))
+
 ## [0.7.9](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.8...foundryvtt-mediasoup-webrtc-v0.7.9) (2025-07-01)
 
 
