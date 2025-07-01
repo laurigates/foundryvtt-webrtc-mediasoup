@@ -95,7 +95,7 @@ jobs:
         WEBRTC_DEBUG: false
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: playwright-results-${{ matrix.browser }}
@@ -148,7 +148,7 @@ jobs:
         docker-compose -f docker-compose.test.yml ps -q playwright-tests | xargs -I {} docker cp {}:/app/tests/results ./test-results-docker/ || true
         
     - name: Upload Docker test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: docker-integration-results
@@ -243,7 +243,7 @@ jobs:
     
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       
     - name: Generate test report
       run: |
@@ -280,7 +280,7 @@ jobs:
         echo "- Browser compatibility (Chromium, Firefox)" >> test-report.md
         
     - name: Upload test report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-report
         path: test-report.md

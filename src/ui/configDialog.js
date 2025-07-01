@@ -4,7 +4,6 @@
  */
 
 import { MODULE_ID, MODULE_TITLE, SETTING_MEDIASOUP_URL, SETTING_AUTO_CONNECT } from '../constants/index.js';
-import { log } from '../utils/logger.js';
 
 export class MediaSoupConfigDialog extends FormApplication {
     constructor(object = {}, options = {}) {
