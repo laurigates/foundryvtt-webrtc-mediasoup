@@ -1,7 +1,7 @@
 /**
- * MediaSoupVTT - Main entry point for FoundryVTT MediaSoup Plugin
+ * MediaSoupVTT - Test entry point for Playwright tests
  * 
- * A WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU server
+ * A test version that doesn't import mediasoup-client and expects it from window.mediasoupClient mock
  */
 
 import { MODULE_ID, MODULE_TITLE, SETTING_AUTO_CONNECT } from './constants/index.js';
@@ -9,15 +9,12 @@ import { log } from './utils/logger.js';
 import { MediaSoupVTTClient } from './client/MediaSoupVTTClient.js';
 import { registerSettings, setupSettingsHooks } from './ui/settings.js';
 import { setupSceneControls } from './ui/sceneControls.js';
-import mediasoupClient from 'mediasoup-client';
 import { setupPlayerListHooks } from './ui/playerList.js';
 import { injectStyles } from './ui/styles.js';
 
-// Expose mediasoup-client to global scope for FoundryVTT compatibility
-window.mediasoupClient = mediasoupClient;
-
+// In test mode, mediasoup-client should already be provided by mock
 // Debug: Log mediasoup-client availability immediately
-console.log('MediaSoupVTT: mediasoup-client assigned to window:', {
+console.log('MediaSoupVTT (Test): mediasoup-client check:', {
     available: !!window.mediasoupClient,
     version: window.mediasoupClient?.version,
     hasDevice: !!window.mediasoupClient?.Device,
@@ -32,7 +29,7 @@ let mediaSoupVTTClientInstance = null;
 // +-------------------------------------------------------------------+
 
 Hooks.once('init', () => {
-    log('Initializing MediaSoupVTT Plugin...', 'info', true);
+    log('Initializing MediaSoupVTT Plugin (Test Mode)...', 'info', true);
 
     // Register all module settings
     registerSettings();
@@ -45,16 +42,16 @@ Hooks.once('init', () => {
 });
 
 Hooks.once('ready', async () => {
-    log('Foundry VTT is ready. MediaSoupVTT is active.', 'info', true);
+    log('Foundry VTT is ready. MediaSoupVTT (Test Mode) is active.', 'info', true);
     
-    // mediasoup-client should now be bundled with the plugin
+    // mediasoup-client should be provided by mock in test mode
     if (!window.mediasoupClient) {
-        ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library was not found. Plugin bundle may be corrupted.`, { permanent: true });
-        log('mediasoup-client library not found. This should not happen with bundled version.', 'error');
+        ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library was not found. Mock may not be loaded properly.`, { permanent: true });
+        log('mediasoup-client library not found. This should not happen in test mode with mock.', 'error');
         return;
     }
     
-    log('mediasoup-client library is available', 'info');
+    log('mediasoup-client library is available from mock', 'info');
 
     // Create global client instance
     mediaSoupVTTClientInstance = new MediaSoupVTTClient();
@@ -92,4 +89,4 @@ Hooks.once('ready', async () => {
     }
 });
 
-log('MediaSoupVTT Plugin script loaded.');
+log('MediaSoupVTT Plugin (Test Mode) script loaded.');

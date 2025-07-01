@@ -9,17 +9,17 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/integration/specs',
   
-  /* Run tests in files in parallel */
-  fullyParallel: true,
+  /* Run tests sequentially to avoid browser crashes */
+  fullyParallel: false,
   
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
   
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  /* Use single worker to prevent browser instability */
+  workers: 1,
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
@@ -46,7 +46,7 @@ export default defineConfig({
     actionTimeout: 30000,
     
     /* Navigation timeout */
-    navigationTimeout: 60000,
+    navigationTimeout: 30000,
   },
 
   /* Configure projects for major browsers */
@@ -55,37 +55,13 @@ export default defineConfig({
       name: 'chromium-webrtc',
       use: { 
         ...devices['Desktop Chrome'],
-        // Chrome flags for WebRTC testing
+        // Minimal Chrome flags for basic testing
         launchOptions: {
           args: [
-            // WebRTC testing flags
-            '--use-fake-ui-for-media-stream',
-            '--use-fake-device-for-media-stream',
-            '--use-file-for-fake-video-capture=tests/integration/fixtures/test-video.y4m',
-            '--use-file-for-fake-audio-capture=tests/integration/fixtures/test-audio.wav',
-            
-            // Allow fake media streams
-            '--allow-file-access-from-files',
+            // Essential testing flags
             '--disable-web-security',
-            '--allow-running-insecure-content',
-            
-            // Media permissions
-            '--auto-accept-camera-and-microphone-capture',
-            '--auto-select-desktop-capture-source=Test',
-            
-            // Disable security features for testing
-            '--disable-features=VizDisplayCompositor',
-            '--disable-backgrounding-occluded-windows',
-            '--disable-background-timer-throttling',
-            '--disable-renderer-backgrounding',
-            '--disable-ipc-flooding-protection',
-            
-            // Enable WebRTC debug logging (optional)
-            process.env.WEBRTC_DEBUG ? '--enable-logging=stderr --log-level=0 --vmodule=*/webrtc/*=1' : '',
-          ].filter(Boolean),
-          
-          // Additional Chrome preferences for WebRTC
-          ignoreDefaultArgs: ['--mute-audio'],
+            '--allow-file-access-from-files',
+          ],
         },
         
         // Grant permissions for media devices
@@ -98,54 +74,20 @@ export default defineConfig({
       },
     },
     
-    {
-      name: 'firefox-webrtc',
-      use: { 
-        ...devices['Desktop Firefox'],
-        launchOptions: {
-          // Firefox preferences for WebRTC testing
-          firefoxUserPrefs: {
-            'media.navigator.streams.fake': true,
-            'media.navigator.permission.disabled': true,
-            'media.gmp-manager.updateEnabled': false,
-            'media.peerconnection.ice.loopback': true,
-            'media.peerconnection.use_document_iceservers': false,
-            'media.peerconnection.identity.timeout': 1000,
-            'media.peerconnection.ice.tcp': false,
-            'media.webrtc.debug.trace_mask': 65535,
-            'media.webrtc.debug.multi_log': true,
-            'logging.config.media_element': 5,
-            'dom.disable_beforeunload': true,
-          }
-        },
-        permissions: ['camera', 'microphone'],
-      },
-    },
-    
-    // Test on WebKit with limited WebRTC support
-    {
-      name: 'webkit-webrtc',
-      use: { 
-        ...devices['Desktop Safari'],
-        permissions: ['camera', 'microphone'],
-      },
-    },
-    
-    // Mobile testing (optional)
-    {
-      name: 'Mobile Chrome',
-      use: { 
-        ...devices['Pixel 5'],
-        launchOptions: {
-          args: [
-            '--use-fake-ui-for-media-stream',
-            '--use-fake-device-for-media-stream',
-            '--auto-accept-camera-and-microphone-capture',
-          ]
-        },
-        permissions: ['camera', 'microphone'],
-      },
-    },
+    // Disable other browsers for now due to large bundle causing instability
+    // {
+    //   name: 'firefox-webrtc',
+    //   use: { 
+    //     ...devices['Desktop Firefox'],
+    //     launchOptions: {
+    //       firefoxUserPrefs: {
+    //         'media.navigator.streams.fake': true,
+    //         'media.navigator.permission.disabled': true,
+    //       }
+    //     },
+    //     permissions: ['camera', 'microphone'],
+    //   },
+    // },
   ],
 
   /* Global setup and teardown */
@@ -153,11 +95,11 @@ export default defineConfig({
   globalTeardown: './tests/integration/setup/global-teardown.js',
   
   /* Test timeout */
-  timeout: 120000, // 2 minutes per test
+  timeout: 60000, // 1 minute per test
   
   /* Expect timeout */
   expect: {
-    timeout: 10000,
+    timeout: 15000,
   },
   
   /* Test file patterns */

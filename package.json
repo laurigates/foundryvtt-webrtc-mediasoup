@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup -c",
+    "build:test": "rollup -c rollup.config.test.js",
     "build:watch": "rollup -c --watch",
     "dev": "npm run build:watch",
     "lint": "eslint src/**/*.js",
