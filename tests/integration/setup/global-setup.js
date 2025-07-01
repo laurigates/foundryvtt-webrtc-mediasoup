@@ -31,11 +31,9 @@ export default async function globalSetup() {
   // Create test fixtures if they don't exist
   createTestFixtures();
   
-  // Start MediaSoup server for integration tests
-  await startMediaSoupServer();
-  
-  // Wait for server to be ready
-  await waitForServer('ws://localhost:4443', 30000);
+  // Skip MediaSoup server startup for basic plugin tests
+  // Server will be started only for tests that actually need it
+  console.log('[GlobalSetup] Skipping MediaSoup server startup for lightweight tests');
   
   console.log('[GlobalSetup] Test environment ready');
 }

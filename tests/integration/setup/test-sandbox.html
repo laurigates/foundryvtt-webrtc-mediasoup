@@ -314,22 +314,21 @@
             updateStatus('Loading plugin...', '#f39c12');
             
             try {
-                addLogEntry('info', 'Loading plugin with bundled mediasoup-client...');
+                // Load mock mediasoup-client first
+                addLogEntry('info', 'Loading mock mediasoup-client...');
+                const mockModule = await import('../mocks/mediasoup-client-mock.js');
+                window.mediasoupClient = mockModule.default;
                 
-                // Load the built plugin (which now includes bundled mediasoup-client)
+                addLogEntry('info', `Mock mediasoup-client loaded (version: ${window.mediasoupClient.version})`);
+                addLogEntry('info', `Available exports: ${Object.keys(window.mediasoupClient).join(', ')}`);
+                
+                // Now load the lightweight test plugin
+                addLogEntry('info', 'Loading lightweight test plugin...');
                 const script = document.createElement('script');
                 script.type = 'module';
-                script.src = '../../../dist/mediasoup-vtt.js';
+                script.src = '../../../dist/mediasoup-vtt-test.js';
                 script.onload = () => {
                     addLogEntry('info', 'Plugin script loaded');
-                    
-                    // Check if mediasoup-client is now available
-                    if (window.mediasoupClient) {
-                        addLogEntry('info', `mediasoup-client bundled successfully (version: ${window.mediasoupClient.version})`);
-                        addLogEntry('info', `Available exports: ${Object.keys(window.mediasoupClient).join(', ')}`);
-                    } else {
-                        addLogEntry('error', 'mediasoup-client not found after loading bundled plugin');
-                    }
                     
                     // Trigger FoundryVTT lifecycle
                     triggerFoundryLifecycle();

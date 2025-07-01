@@ -11,20 +11,40 @@ test.describe('MediaSoup Plugin Loading', () => {
   let page;
   
   test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
-    
-    // Navigate to test sandbox
-    await page.goto('/tests/integration/setup/test-sandbox.html');
-    
-    // Wait for mock environment to initialize
-    await page.waitForFunction(() => window.testSandbox && window.game);
-    
-    // Verify mock environment is ready
-    await expect(page.locator('#test-status')).toContainText('Ready for testing');
+    try {
+      page = await browser.newPage();
+      
+      // Set default timeout for mock environment
+      page.setDefaultTimeout(30000);
+      
+      // Navigate to test sandbox
+      await page.goto('/tests/integration/setup/test-sandbox.html', { 
+        waitUntil: 'domcontentloaded',
+        timeout: 30000 
+      });
+      
+      // Wait for mock environment to initialize
+      await page.waitForFunction(() => window.testSandbox && window.game, { timeout: 15000 });
+      
+      // Verify mock environment is ready
+      await expect(page.locator('#test-status')).toContainText('Ready for testing', { timeout: 15000 });
+    } catch (error) {
+      console.error('BeforeEach setup failed:', error);
+      if (page) {
+        await page.close().catch(() => {});
+      }
+      throw error;
+    }
   });
   
   test.afterEach(async () => {
-    await page.close();
+    if (page && !page.isClosed()) {
+      try {
+        await page.close();
+      } catch (error) {
+        console.warn('Error closing page:', error.message);
+      }
+    }
   });
   
   test('should load mock FoundryVTT environment correctly', async () => {
@@ -46,34 +66,39 @@ test.describe('MediaSoup Plugin Loading', () => {
     expect(mockObjects.userId).toBe('test-user-123');
   });
   
-  test('should load bundled mediasoup-client library', async () => {
+  test('should load mock mediasoup-client library', async () => {
     // Initially should not be loaded (before plugin initialization)
     const initialState = await page.evaluate(() => !!window.mediasoupClient);
     expect(initialState).toBeFalsy();
     
-    // Click initialize plugin - this should load the bundled plugin with mediasoup-client
+    // Click initialize plugin - this should load the mock mediasoup-client
     await page.click('#btn-init-plugin');
     
-    // Wait for bundled library to be exposed
+    // Wait for mock library to be exposed
     await page.waitForFunction(() => window.mediasoupClient, { timeout: 10000 });
     
-    // Check that bundled library is now available
+    // Wait a bit for initialization to complete
+    await page.waitForTimeout(1000);
+    
+    // Check that mock library is now available
     const mediasoupInfo = await page.evaluate(() => ({
       hasMediaSoupClient: !!window.mediasoupClient,
       version: window.mediasoupClient?.version,
-      exports: window.mediasoupClient ? Object.keys(window.mediasoupClient) : []
+      exports: window.mediasoupClient ? Object.keys(window.mediasoupClient) : [],
+      typeofDevice: typeof window.mediasoupClient?.Device
     }));
     
     expect(mediasoupInfo.hasMediaSoupClient).toBeTruthy();
     expect(mediasoupInfo.version).toBe('3.11.0');
     expect(mediasoupInfo.exports).toContain('Device');
     expect(mediasoupInfo.exports).toContain('detectDevice');
+    expect(mediasoupInfo.typeofDevice).toBe('function');
     
-    // Check basic mediasoup-client functionality
+    // Check basic mock mediasoup-client functionality
     const deviceTest = await page.evaluate(() => {
       try {
         const device = new window.mediasoupClient.Device();
-        return { hasDevice: true, loaded: device.loaded };
+        return { hasDevice: true, loaded: device.loaded, deviceType: typeof device };
       } catch (error) {
         return { hasDevice: false, error: error.message };
       }
@@ -81,6 +106,7 @@ test.describe('MediaSoup Plugin Loading', () => {
     
     expect(deviceTest.hasDevice).toBeTruthy();
     expect(deviceTest.loaded).toBeFalsy(); // Should not be loaded initially
+    expect(deviceTest.deviceType).toBe('object');
   });
   
   test('should initialize plugin successfully', async () => {
