@@ -32,6 +32,8 @@ module.exports = {
         Compendium: 'readonly',
         Setting: 'readonly',
         SettingsConfig: 'readonly',
+        FormApplication: 'readonly',
+        foundry: 'readonly',
         
         // MediaSoup globals
         mediasoupClient: 'readonly',
