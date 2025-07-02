@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.12](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.11...foundryvtt-mediasoup-webrtc-v0.7.12) (2025-07-02)
+
+
+### Bug Fixes
+
+* improve MediaSoupVTTClient constructor safety ([#55](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/55)) ([6b2fac8](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/6b2fac85b1c29545b363aa9d58e73ef2460efd08))
+
 ## [0.7.11](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.10...foundryvtt-mediasoup-webrtc-v0.7.11) (2025-07-02)
 
 
