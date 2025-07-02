@@ -47,9 +47,11 @@ function getReplacements() {
   const packageVersion = getPackageVersion();
   
   // Define replacement values with fallbacks to placeholder values
+  const fullRepoPath = `${gitInfo.username}/${gitInfo.repository}`;
+  
   return {
     GITHUB_USERNAME: process.env.GITHUB_USERNAME || gitInfo.username,
-    GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY || gitInfo.repository,
+    GITHUB_REPOSITORY: process.env.GITHUB_REPOSITORY || fullRepoPath,
     MODULE_VERSION: process.env.MODULE_VERSION || packageVersion,
     AUTHOR_NAME: process.env.AUTHOR_NAME || getGitConfig('user.name', 'Your Name'),
     AUTHOR_EMAIL: process.env.AUTHOR_EMAIL || getGitConfig('user.email', 'your.email@example.com'),
@@ -85,17 +87,21 @@ function processTemplateToString() {
 }
 
 function processTemplate() {
-  const outputPath = path.join(__dirname, '..', 'dist', 'module.json');
+  const distOutputPath = path.join(__dirname, '..', 'dist', 'module.json');
+  const rootOutputPath = path.join(__dirname, '..', 'module.json');
   const template = processTemplateToString();
   
   // Ensure output directory exists
-  const distDir = path.dirname(outputPath);
+  const distDir = path.dirname(distOutputPath);
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
   }
   
-  // Write processed template
-  fs.writeFileSync(outputPath, template, 'utf8');
+  // Write processed template to both dist/ and root
+  fs.writeFileSync(distOutputPath, template, 'utf8');
+  fs.writeFileSync(rootOutputPath, template, 'utf8');
+  
+  console.log('✓ module.json written to dist/ and root directories');
 }
 
 module.exports = { processTemplate, processTemplateToString };
