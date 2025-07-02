@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.11](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.10...foundryvtt-mediasoup-webrtc-v0.7.11) (2025-07-02)
+
+
+### Bug Fixes
+
+* resolve module configuration page visibility in FoundryVTT ([#48](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/48)) ([8d66270](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/8d662702a5a46fe719f8bebd68fe2f899b224b2d))
+
 ## [0.7.10](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.9...foundryvtt-mediasoup-webrtc-v0.7.10) (2025-07-01)
 
 
