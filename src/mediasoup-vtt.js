@@ -59,6 +59,9 @@ Hooks.once('ready', async () => {
     // Create global client instance
     mediaSoupVTTClientInstance = new MediaSoupVTTClient();
     window.MediaSoupVTT_Client = mediaSoupVTTClientInstance;
+    
+    // Update server URL from settings now that they're available
+    mediaSoupVTTClientInstance.updateServerUrl();
 
     // Setup UI hooks
     setupSceneControls();
