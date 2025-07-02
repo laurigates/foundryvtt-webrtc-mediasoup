@@ -306,6 +306,35 @@ function createMockUI() {
     };
 }
 
+// Mock FoundryVTT FormApplication class
+class MockFormApplication {
+    constructor(options = {}) {
+        this.options = options;
+        this.rendered = false;
+    }
+    
+    render(force = false) {
+        console.log(`[MockFoundry] FormApplication.render(${force})`);
+        this.rendered = true;
+        return this;
+    }
+    
+    close() {
+        console.log('[MockFoundry] FormApplication.close()');
+        this.rendered = false;
+        return Promise.resolve();
+    }
+    
+    static get defaultOptions() {
+        return {
+            classes: [],
+            template: null,
+            width: 'auto',
+            height: 'auto'
+        };
+    }
+}
+
 // Initialize Mock Environment
 export function initializeMockFoundryVTT() {
     console.log('[MockFoundry] Initializing mock FoundryVTT environment...');
@@ -316,6 +345,7 @@ export function initializeMockFoundryVTT() {
     window.game = createMockGame();
     window.ui = createMockUI();
     window.Hooks = new MockHooks();
+    window.FormApplication = MockFormApplication;
     
     // Create basic DOM structure for player list
     const playerListHTML = `
@@ -429,18 +459,21 @@ export function initializeMockFoundryVTT() {
 export function triggerFoundryLifecycle() {
     console.log('[MockFoundry] Triggering FoundryVTT lifecycle events...');
     
-    // Simulate FoundryVTT initialization sequence
+    // Simulate FoundryVTT initialization sequence with shorter delays for testing
     setTimeout(() => {
+        console.log('[MockFoundry] Calling hook: init []');
         window.Hooks.call('init');
+    }, 50);
+    
+    setTimeout(() => {
+        console.log('[MockFoundry] Calling hook: ready []');
+        window.Hooks.call('ready');
     }, 100);
     
     setTimeout(() => {
-        window.Hooks.call('ready');
-    }, 200);
-    
-    setTimeout(() => {
+        console.log('[MockFoundry] Calling hook: getSceneControlButtons [[]]');
         window.Hooks.call('getSceneControlButtons', []);
-    }, 300);
+    }, 150);
 }
 
 // Helper to get test results

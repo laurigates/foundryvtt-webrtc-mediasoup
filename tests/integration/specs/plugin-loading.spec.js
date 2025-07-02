@@ -110,29 +110,106 @@ test.describe('MediaSoup Plugin Loading', () => {
   });
   
   test('should initialize plugin successfully', async () => {
+    // Monitor console logs and errors for debugging
+    const logs = [];
+    const errors = [];
+    
+    page.on('console', msg => {
+      logs.push(`${msg.type()}: ${msg.text()}`);
+    });
+    
+    page.on('pageerror', err => {
+      errors.push(err.message);
+    });
+    
     // Click the initialize plugin button
     await page.click('#btn-init-plugin');
     
-    // Wait for plugin initialization
-    await page.waitForFunction(
-      () => window.MediaSoupVTT_Client && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient',
-      { timeout: 10000 }
-    );
+    // Wait for mediasoup-client mock to be loaded first
+    await page.waitForFunction(() => window.mediasoupClient, { timeout: 5000 });
+    
+    // Add debugging information about what's happening
+    const debugInfo = await page.evaluate(() => {
+      return {
+        hasMediasoupClient: !!window.mediasoupClient,
+        hasGame: !!window.game,
+        hasUI: !!window.ui,
+        hasHooks: !!window.Hooks,
+        hookCalls: window.testHookCalls || [],
+        mediasoupExports: window.mediasoupClient ? Object.keys(window.mediasoupClient) : [],
+        anyMediaSoupVars: Object.keys(window).filter(k => k.includes('MediaSoup'))
+      };
+    });
+    
+    console.log('Debug info before waiting for client:', debugInfo);
+    
+    // Try to wait for client creation with detailed debugging
+    try {
+      await page.waitForFunction(
+        () => {
+          // Add detailed logging in the browser
+          if (!window.debugCounter) window.debugCounter = 0;
+          window.debugCounter++;
+          
+          const hasClient = !!window.MediaSoupVTT_Client;
+          const isCorrectType = hasClient && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient';
+          const hasRequiredMethods = hasClient && typeof window.MediaSoupVTT_Client.updateServerUrl === 'function';
+          
+          if (window.debugCounter % 10 === 0) {
+            console.log(`Debug ${window.debugCounter}: hasClient=${hasClient}, isCorrectType=${isCorrectType}, hasRequiredMethods=${hasRequiredMethods}`);
+            if (hasClient) {
+              console.log('Client found!', window.MediaSoupVTT_Client);
+            }
+          }
+          
+          return hasClient && isCorrectType && hasRequiredMethods;
+        },
+        { timeout: 30000 }
+      );
+    } catch (timeoutError) {
+      // If timeout, gather detailed debug information
+      const finalDebugInfo = await page.evaluate(() => ({
+        logs: window.testLogs || [],
+        errors: window.testErrors || [],
+        hasClient: !!window.MediaSoupVTT_Client,
+        clientType: window.MediaSoupVTT_Client?.constructor?.name,
+        isInitialized: window.isInitialized,
+        allGlobals: Object.keys(window).filter(k => k.startsWith('MediaSoup') || k.includes('mediasoup')),
+        hookCalls: window.testHookCalls || []
+      }));
+      
+      console.log('=== TIMEOUT DEBUG INFO ===');
+      console.log('Console logs:', logs.slice(-20)); // Last 20 logs
+      console.log('Page errors:', errors);
+      console.log('Final debug info:', finalDebugInfo);
+      console.log('==========================');
+      
+      throw timeoutError;
+    }
+    
+    // Wait a bit more for status update
+    await page.waitForTimeout(500);
     
     // Check plugin status
-    await expect(page.locator('#test-status')).toContainText('Plugin initialized', { timeout: 15000 });
+    await expect(page.locator('#test-status')).toContainText('Plugin initialized', { timeout: 10000 });
     
-    // Verify client instance is created
+    // Verify client instance is created with more detailed checks
     const clientInfo = await page.evaluate(() => ({
       hasClient: !!window.MediaSoupVTT_Client,
+      constructorName: window.MediaSoupVTT_Client?.constructor?.name,
       isConnected: window.MediaSoupVTT_Client?.isConnected,
       isConnecting: window.MediaSoupVTT_Client?.isConnecting,
-      serverUrl: window.MediaSoupVTT_Client?.serverUrl
+      serverUrl: window.MediaSoupVTT_Client?.serverUrl,
+      hasUpdateMethod: typeof window.MediaSoupVTT_Client?.updateServerUrl === 'function',
+      deviceProperty: window.MediaSoupVTT_Client?.device
     }));
     
     expect(clientInfo.hasClient).toBeTruthy();
+    expect(clientInfo.constructorName).toBe('MediaSoupVTTClient');
     expect(clientInfo.isConnected).toBeFalsy();
     expect(clientInfo.isConnecting).toBeFalsy();
+    expect(clientInfo.hasUpdateMethod).toBeTruthy();
+    expect(clientInfo.deviceProperty).toBeNull(); // Should be null initially
   });
   
   test('should register settings correctly', async () => {
