@@ -20,7 +20,9 @@ export class MediaSoupVTTClient {
         this.producers = new Map();
         this.consumers = new Map();
 
-        this.serverUrl = game.settings.get(MODULE_ID, SETTING_MEDIASOUP_URL);
+        // Initialize server URL as empty - will be updated later when settings are available
+        this.serverUrl = '';
+        
         this.isConnected = false;
         this.isConnecting = false;
         this.requestMap = new Map();
@@ -32,7 +34,24 @@ export class MediaSoupVTTClient {
 
         if (!window.mediasoupClient) {
             log('mediasoup-client library is not loaded. This plugin will not function.', 'error', true);
-            ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library not found! Critical error.`, { permanent: true });
+            if (typeof ui !== 'undefined' && ui.notifications) {
+                ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library not found! Critical error.`, { permanent: true });
+            }
+        }
+        
+        log('MediaSoupVTTClient constructor completed successfully', 'debug');
+    }
+
+    /**
+     * Update server URL from settings after construction
+     */
+    updateServerUrl() {
+        try {
+            this.serverUrl = game?.settings?.get(MODULE_ID, SETTING_MEDIASOUP_URL) || '';
+            log(`Server URL updated to: ${this.serverUrl}`, 'debug');
+        } catch (error) {
+            log(`Error getting server URL from settings: ${error.message}`, 'warn');
+            this.serverUrl = '';
         }
     }
 
