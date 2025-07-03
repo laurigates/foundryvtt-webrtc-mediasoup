@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.13](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.12...foundryvtt-mediasoup-webrtc-v0.7.13) (2025-07-03)
+
+
+### Bug Fixes
+
+* resolve test environment timing issues and client instantiation failures ([#58](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/58)) ([16911f8](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/16911f8c9e7abbbcab535b0b35641197fc6aac4d))
+
 ## [0.7.12](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.11...foundryvtt-mediasoup-webrtc-v0.7.12) (2025-07-02)
 
 
