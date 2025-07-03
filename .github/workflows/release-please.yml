@@ -46,19 +46,15 @@ jobs:
       - name: Create FoundryVTT module zip
         if: ${{ steps.release.outputs.release_created }}
         run: |
-          # Create a clean directory with only the files needed for the module
+          # The dist/ directory already contains the complete, correct FoundryVTT module structure
+          # Simply copy all contents to create the proper zip structure
           mkdir -p module-package
           
-          # Copy the main built JavaScript file
-          cp dist/mediasoup-vtt.js module-package/
+          # Copy entire dist directory contents to package root (this gives us the correct structure)
+          cp -r dist/* module-package/
           
-          # Copy the processed module.json (which has correct version and metadata)
-          cp module.json module-package/
-          
-          # Copy required module directories if they exist
-          if [ -d "lang" ]; then cp -r lang/ module-package/; fi
-          if [ -d "styles" ]; then cp -r styles/ module-package/; fi
-          if [ -d "templates" ]; then cp -r templates/ module-package/; fi
+          # Override with the root module.json which has the correct version from release-please
+          cp module.json module-package/module.json
           
           # List contents for debugging
           echo "Module package contents:"
