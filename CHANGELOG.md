@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.14](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.13...foundryvtt-mediasoup-webrtc-v0.7.14) (2025-07-03)
+
+
+### Bug Fixes
+
+* correct FoundryVTT module package structure for proper installation ([#63](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/63)) ([eece9c7](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/eece9c70dc156a9957188aeffb05d8c971078767))
+
 ## [0.7.13](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.12...foundryvtt-mediasoup-webrtc-v0.7.13) (2025-07-03)
 
 
