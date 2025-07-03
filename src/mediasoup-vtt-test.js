@@ -23,12 +23,18 @@ console.log('MediaSoupVTT (Test): mediasoup-client check:', {
 
 // Global instance of our client
 let mediaSoupVTTClientInstance = null;
+let isInitialized = false;
 
 // +-------------------------------------------------------------------+
 // |                        FOUNDRY VTT HOOKS                          |
 // +-------------------------------------------------------------------+
 
 Hooks.once('init', () => {
+    if (isInitialized) {
+        log('MediaSoupVTT Plugin already initialized, skipping init hook', 'warn');
+        return;
+    }
+    
     log('Initializing MediaSoupVTT Plugin (Test Mode)...', 'info', true);
 
     // Register all module settings
@@ -42,7 +48,15 @@ Hooks.once('init', () => {
 });
 
 Hooks.once('ready', async () => {
+    if (isInitialized) {
+        log('MediaSoupVTT Plugin already ready, skipping ready hook', 'warn');
+        return;
+    }
+    
     log('Foundry VTT is ready. MediaSoupVTT (Test Mode) is active.', 'info', true);
+    
+    // Add small delay to ensure all mock systems are fully initialized
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // mediasoup-client should be provided by mock in test mode
     if (!window.mediasoupClient) {
@@ -53,12 +67,30 @@ Hooks.once('ready', async () => {
     
     log('mediasoup-client library is available from mock', 'info');
 
-    // Create global client instance
-    mediaSoupVTTClientInstance = new MediaSoupVTTClient();
-    window.MediaSoupVTT_Client = mediaSoupVTTClientInstance;
-    
-    // Update server URL from settings now that they're available
-    mediaSoupVTTClientInstance.updateServerUrl();
+    try {
+        // Create global client instance with error handling for test environment
+        log('Creating MediaSoupVTTClient instance...', 'debug');
+        mediaSoupVTTClientInstance = new MediaSoupVTTClient();
+        log('MediaSoupVTTClient instance created successfully', 'debug');
+        
+        // Expose globally for tests
+        window.MediaSoupVTT_Client = mediaSoupVTTClientInstance;
+        log('MediaSoupVTT_Client exposed globally', 'debug');
+        
+        // Update server URL from settings now that they're available
+        mediaSoupVTTClientInstance.updateServerUrl();
+        log('Client server URL updated from settings', 'debug');
+        
+        // Mark as initialized to prevent duplicate initialization
+        isInitialized = true;
+        log('MediaSoupVTT Plugin initialization completed successfully', 'info');
+        
+    } catch (error) {
+        log(`Error creating MediaSoupVTTClient instance: ${error.message}`, 'error');
+        console.error('Client instantiation error:', error);
+        ui.notifications.error(`${MODULE_TITLE}: Failed to create client instance - ${error.message}`, { permanent: true });
+        return;
+    }
 
     // Setup UI hooks
     setupSceneControls();

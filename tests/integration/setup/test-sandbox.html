@@ -332,7 +332,17 @@
                     
                     // Trigger FoundryVTT lifecycle
                     triggerFoundryLifecycle();
-                    updateStatus('Plugin initialized', '#27ae60');
+                    
+                    // Wait for client to be actually created before updating status
+                    const checkClientReady = () => {
+                        if (window.MediaSoupVTT_Client && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient') {
+                            updateStatus('Plugin initialized', '#27ae60');
+                            addLogEntry('info', 'MediaSoupVTT_Client successfully created and exposed globally');
+                        } else {
+                            setTimeout(checkClientReady, 100);
+                        }
+                    };
+                    setTimeout(checkClientReady, 200); // Give some time for lifecycle to complete
                 };
                 script.onerror = (error) => {
                     addLogEntry('error', 'Failed to load plugin script', error);
