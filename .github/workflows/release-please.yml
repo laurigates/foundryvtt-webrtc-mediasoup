@@ -20,3 +20,59 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          
+      - name: Checkout code
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm ci
+
+      - name: Build module
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm run build
+
+      - name: Generate module.json
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm run process-template
+
+      - name: Create FoundryVTT module zip
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          # Create a clean directory with only the files needed for the module
+          mkdir -p module-package
+          
+          # Copy the main built JavaScript file
+          cp dist/mediasoup-vtt.js module-package/
+          
+          # Copy the processed module.json (which has correct version and metadata)
+          cp module.json module-package/
+          
+          # Copy required module directories if they exist
+          if [ -d "lang" ]; then cp -r lang/ module-package/; fi
+          if [ -d "styles" ]; then cp -r styles/ module-package/; fi
+          if [ -d "templates" ]; then cp -r templates/ module-package/; fi
+          
+          # List contents for debugging
+          echo "Module package contents:"
+          find module-package -type f
+          
+          # Create the zip from the clean package directory
+          cd module-package
+          zip -r ../mediasoup-vtt.zip .
+
+      - name: Upload FoundryVTT module artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Upload both the module zip and the module.json for the manifest URL
+          gh release upload "${{ steps.release.outputs.tag_name }}" mediasoup-vtt.zip
+          gh release upload "${{ steps.release.outputs.tag_name }}" module-package/module.json --clobber
