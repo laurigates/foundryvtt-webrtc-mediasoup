@@ -118,7 +118,7 @@ Hooks.once('ready', async () => {
                     await mediaSoupVTTClientInstance._populateDeviceSettings();
                 }
             } catch (e) { 
-                log("Error querying permissions on ready: " + e.message, "warn"); 
+                log('Error querying permissions on ready: ' + e.message, 'warn'); 
             }
         }
     }
