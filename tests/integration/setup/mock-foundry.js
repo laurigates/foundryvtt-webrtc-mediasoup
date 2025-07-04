@@ -101,11 +101,44 @@ class MockSettings {
     
     register(module, key, options) {
         const fullKey = `${module}.${key}`;
-        this.settings.set(fullKey, {
-            ...options,
+        
+        // Manually create the setting object to ensure the type field is preserved
+        // Convert function constructors to their string names for cross-boundary compatibility
+        let typeValue = options.type;
+        if (typeof options.type === 'function') {
+            if (options.type === Boolean) typeValue = 'Boolean';
+            else if (options.type === String) typeValue = 'String';
+            else if (options.type === Number) typeValue = 'Number';
+            else typeValue = options.type.name || 'Function';
+        }
+        
+        const setting = {
+            name: options.name,
+            hint: options.hint,
+            scope: options.scope,
+            config: options.config,
+            type: typeValue, // Store converted type
+            default: options.default,
+            choices: options.choices,
+            onChange: options.onChange,
+            key: fullKey,
             value: options.default
+        };
+        
+        // Remove undefined fields
+        Object.keys(setting).forEach(key => {
+            if (setting[key] === undefined) {
+                delete setting[key];
+            }
         });
-        console.log(`[MockFoundry] Registered setting: ${fullKey}`, options);
+        
+        this.settings.set(fullKey, setting);
+        console.log(`[MockFoundry] Registered setting: ${fullKey}`, JSON.stringify(options, (key, value) => {
+            if (typeof value === 'function') {
+                return value.name || 'Function';
+            }
+            return value;
+        }));
     }
     
     registerMenu(module, key, options) {
