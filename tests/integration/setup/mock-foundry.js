@@ -143,8 +143,38 @@ class MockSettings {
     
     registerMenu(module, key, options) {
         const fullKey = `${module}.${key}`;
-        this.menus.set(fullKey, options);
-        console.log(`[MockFoundry] Registered menu: ${fullKey}`, options);
+        
+        // Manually create the menu object to ensure the type field is preserved
+        // Convert function constructors to their string names for cross-boundary compatibility
+        let typeValue = options.type;
+        if (typeof options.type === 'function') {
+            typeValue = options.type.name || 'Function';
+        }
+        
+        const menu = {
+            name: options.name,
+            label: options.label,
+            hint: options.hint,
+            icon: options.icon,
+            type: typeValue, // Store converted type
+            restricted: options.restricted,
+            key: fullKey
+        };
+        
+        // Remove undefined fields
+        Object.keys(menu).forEach(key => {
+            if (menu[key] === undefined) {
+                delete menu[key];
+            }
+        });
+        
+        this.menus.set(fullKey, menu);
+        console.log(`[MockFoundry] Registered menu: ${fullKey}`, JSON.stringify(options, (key, value) => {
+            if (typeof value === 'function') {
+                return value.name || 'Function';
+            }
+            return value;
+        }));
     }
     
     get(module, key) {
