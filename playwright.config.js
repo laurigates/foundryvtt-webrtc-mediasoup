@@ -61,6 +61,10 @@ export default defineConfig({
             // Essential testing flags
             '--disable-web-security',
             '--allow-file-access-from-files',
+            // Enable fake media devices for testing
+            '--use-fake-ui-for-media-stream',
+            '--use-fake-device-for-media-stream',
+            '--allow-running-insecure-content',
           ],
         },
         

@@ -339,7 +339,7 @@ test.describe('MediaSoup Plugin Loading', () => {
   
   test('should handle corrupted plugin bundle gracefully', async () => {
     // Mock the plugin bundle to fail loading
-    await page.route('**/mediasoup-vtt.js', route => {
+    await page.route('**/mediasoup-vtt-test.js', route => {
       route.abort('failed');
     });
     
