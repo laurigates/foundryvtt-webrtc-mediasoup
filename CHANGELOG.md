@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.17](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.16...foundryvtt-mediasoup-webrtc-v0.7.17) (2025-07-05)
+
+
+### Bug Fixes
+
+* enable audio/video stream creation in test mode ([#95](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/95)) ([2761ec9](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/2761ec97d98f3a7aa788eb7ef68650779098d926))
+
 ## [0.7.16](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.15...foundryvtt-mediasoup-webrtc-v0.7.16) (2025-07-05)
 
 
