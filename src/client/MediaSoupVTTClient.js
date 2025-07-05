@@ -61,9 +61,23 @@ export class MediaSoupVTTClient {
             return;
         }
         if (!this.serverUrl) {
-            log('MediaSoup server URL is not configured.', 'warn', true);
+            const errorMsg = 'MediaSoup server URL is not configured.';
+            log(errorMsg, 'warn', true);
             ui.notifications.warn(`${MODULE_TITLE}: MediaSoup server URL not configured. Please set it in module settings.`);
-            return;
+            throw new Error(errorMsg);
+        }
+        
+        // Validate URL format
+        try {
+            const url = new URL(this.serverUrl);
+            if (!['ws:', 'wss:'].includes(url.protocol)) {
+                throw new Error(`Invalid protocol: ${url.protocol}. Must be ws: or wss:`);
+            }
+        } catch (urlError) {
+            const errorMsg = `Invalid server URL format: ${urlError.message}`;
+            log(errorMsg, 'error', true);
+            ui.notifications.error(`${MODULE_TITLE}: ${errorMsg}`);
+            throw new Error(errorMsg);
         }
         if (!window.mediasoupClient) {
             log('mediasoup-client library not found. Cannot connect.', 'error', true);
