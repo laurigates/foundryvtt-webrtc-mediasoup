@@ -55,8 +55,10 @@ test.describe('MediaSoup Settings Configuration', () => {
     await page.click('#btn-open-settings');
     await expect(page.locator('#settings-modal')).toHaveClass(/visible/);
     
-    // Click overlay (force click since modal may overlay it)
-    await page.click('#modal-overlay', { force: true });
+    // Click overlay using JavaScript event dispatch to bypass overlay issues
+    await page.evaluate(() => {
+      document.getElementById('modal-overlay').click();
+    });
     await expect(page.locator('#settings-modal')).not.toHaveClass(/visible/);
   });
   

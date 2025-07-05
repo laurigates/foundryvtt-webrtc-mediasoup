@@ -211,6 +211,9 @@ test.describe('MediaSoup Server Connection', () => {
     
     // Test with no URL
     let result = await page.evaluate(async () => {
+      // Reset client state first
+      window.MediaSoupVTT_Client.isConnected = false;
+      window.MediaSoupVTT_Client.isConnecting = false;
       window.MediaSoupVTT_Client.serverUrl = '';
       try {
         await window.MediaSoupVTT_Client.connect();
@@ -220,10 +223,14 @@ test.describe('MediaSoup Server Connection', () => {
       }
     });
     
+    console.log('First test result:', result);
     expect(result.connected).toBeFalsy();
     
     // Test with invalid URL format
     result = await page.evaluate(async () => {
+      // Reset client state again
+      window.MediaSoupVTT_Client.isConnected = false;
+      window.MediaSoupVTT_Client.isConnecting = false;
       window.MediaSoupVTT_Client.serverUrl = 'not-a-url';
       try {
         await window.MediaSoupVTT_Client.connect();
