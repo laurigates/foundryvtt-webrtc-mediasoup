@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.16](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.15...foundryvtt-mediasoup-webrtc-v0.7.16) (2025-07-05)
+
+
+### Bug Fixes
+
+* resolve settings menu registration test failure ([#82](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/82)) ([3f5deae](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/3f5deaefc8be36baca279ba0461e9705018ab4ca)), closes [#66](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/66)
+
 ## [0.7.15](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.14...foundryvtt-mediasoup-webrtc-v0.7.15) (2025-07-04)
 
 
