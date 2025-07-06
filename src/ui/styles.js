@@ -34,5 +34,13 @@ export function injectStyles() {
             z-index: 1;
         }
     `;
-    $('head').append(`<style id="mediasoup-vtt-styles">${styles}</style>`);
+    const existingStyles = document.getElementById('mediasoup-vtt-styles');
+    if (existingStyles) {
+        existingStyles.remove();
+    }
+    
+    const styleElement = document.createElement('style');
+    styleElement.id = 'mediasoup-vtt-styles';
+    styleElement.textContent = styles;
+    document.head.appendChild(styleElement);
 }

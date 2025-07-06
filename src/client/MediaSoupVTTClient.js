@@ -132,10 +132,12 @@ export class MediaSoupVTTClient {
         this.stopLocalVideo(false);
 
         if (this.socket) {
+            // Clear all event handlers to prevent memory leaks
             this.socket.onopen = null;
             this.socket.onmessage = null;
             this.socket.onerror = null;
             this.socket.onclose = null;
+            
             if (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING) {
                 this.socket.close();
             }
@@ -152,7 +154,10 @@ export class MediaSoupVTTClient {
             );
             if (userStreamData) {
                 const userId = userStreamData[0];
-                if (consumer.kind === MEDIA_KIND_AUDIO) $(`#mediasoup-consumer-audio-${userId}`).remove();
+                if (consumer.kind === MEDIA_KIND_AUDIO) {
+                    const audioElement = document.getElementById(`mediasoup-consumer-audio-${userId}`);
+                    if (audioElement) audioElement.remove();
+                }
                 else if (consumer.kind === MEDIA_KIND_VIDEO) this._removeRemoteVideoElement(userId);
             }
         });
@@ -639,12 +644,16 @@ export class MediaSoupVTTClient {
         }
         
         if (!appData || !appData.rtpParameters) {
-            log(`Cannot consume producer ${producerId}: Missing rtpParameters in appData from server notification.`, 'error');
+            const errorMsg = `Cannot consume producer ${producerId}: Missing rtpParameters in appData from server notification.`;
+            log(errorMsg, 'error');
+            ui.notifications.error('MediaSoup: Failed to consume media stream - server configuration error');
             return;
         }
 
         if (!this.isConnected || !this.recvTransport || !this.device.canConsume({ producerId, kind, rtpParameters: appData.rtpParameters })) {
-            log(`Cannot consume new producer ${producerId}: Not ready or device cannot consume. Device consumable check failed.`, 'warn');
+            const errorMsg = `Cannot consume new producer ${producerId}: Not ready or device cannot consume. Device consumable check failed.`;
+            log(errorMsg, 'warn');
+            ui.notifications.warn(`MediaSoup: Unable to receive ${kind} stream from user - device not compatible`);
             return;
         }
         log(`Handling new remote producer ${producerId} of kind ${kind} from user ${userId}`, 'info');
@@ -734,7 +743,10 @@ export class MediaSoupVTTClient {
 
             if (userStreams) {
                 if (kind === MEDIA_KIND_AUDIO) {
-                    $(`#mediasoup-consumer-audio-${userId}`).remove();
+                    const audioElement = document.getElementById(`mediasoup-consumer-audio-${userId}`);
+                    if (audioElement) {
+                        audioElement.remove();
+                    }
                     userStreams.audioTrack = null;
                     userStreams.audioConsumerId = null;
                 } else if (kind === MEDIA_KIND_VIDEO) {
@@ -755,24 +767,82 @@ export class MediaSoupVTTClient {
     }
 
     // UI helper methods
-    _updateConnectionStatus(_status) {
-        // This method is called but implementation is handled in UI modules
-        // Keeping as placeholder for interface compatibility
+    _updateConnectionStatus(status) {
+        // Update UI elements to reflect connection status
+        const statusElement = document.querySelector('#mediasoup-connection-status');
+        if (statusElement) {
+            statusElement.textContent = status;
+            statusElement.className = `mediasoup-status ${status.toLowerCase()}`;
+        }
+        
+        // Update scene controls if they exist
+        const connectButton = document.querySelector('[data-tool="mediasoup-connect"]');
+        if (connectButton) {
+            connectButton.classList.toggle('active', status === 'connected');
+            connectButton.title = `MediaSoup: ${status}`;
+        }
+        
+        log(`Connection status updated: ${status}`, 'debug');
     }
 
-    _updateMediaButtonState(_mediaTag, _isActive, _isPaused) {
-        // This method is called but implementation is handled in UI modules
-        // Keeping as placeholder for interface compatibility
+    _updateMediaButtonState(mediaTag, isActive, isPaused) {
+        // Update scene control buttons for audio/video state
+        const buttonSelector = `[data-tool="mediasoup-${mediaTag}"]`;
+        const button = document.querySelector(buttonSelector);
+        
+        if (button) {
+            button.classList.toggle('active', isActive);
+            button.classList.toggle('paused', isPaused);
+            
+            // Update button title/tooltip
+            let status = 'off';
+            if (isActive && isPaused) status = 'paused';
+            else if (isActive) status = 'on';
+            
+            button.title = `${mediaTag}: ${status}`;
+            
+            // Update icon if it exists
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.className = `fas fa-${mediaTag === 'audio' ? 'microphone' : 'video'}${isActive ? (isPaused ? '-slash' : '') : '-slash'}`;
+            }
+        }
+        
+        log(`Media button state updated: ${mediaTag} - active: ${isActive}, paused: ${isPaused}`, 'debug');
     }
 
-    _displayLocalVideoPreview(_stream) {
-        // This method is called but implementation is handled in UI modules
-        // Keeping as placeholder for interface compatibility
+    _displayLocalVideoPreview(stream) {
+        // Remove existing preview
+        this._removeLocalVideoPreview();
+        
+        if (!stream) return;
+        
+        // Create video preview element
+        const videoPreview = document.createElement('video');
+        videoPreview.id = 'mediasoup-local-video-preview';
+        videoPreview.className = 'mediasoup-video-preview';
+        videoPreview.autoplay = true;
+        videoPreview.playsInline = true;
+        videoPreview.muted = true;
+        videoPreview.srcObject = stream;
+        
+        // Add to document body
+        document.body.appendChild(videoPreview);
+        
+        log('Local video preview displayed', 'debug');
     }
 
     _removeLocalVideoPreview() {
-        // This method is called but implementation is handled in UI modules
-        // Keeping as placeholder for interface compatibility
+        const videoPreview = document.getElementById('mediasoup-local-video-preview');
+        if (videoPreview) {
+            // Stop all tracks if srcObject exists
+            if (videoPreview.srcObject) {
+                const tracks = videoPreview.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+            videoPreview.remove();
+            log('Local video preview removed', 'debug');
+        }
     }
 
     _removeRemoteVideoElement(userId) {
@@ -785,15 +855,21 @@ export class MediaSoupVTTClient {
         ];
         
         for (const selector of playerSelectors) {
-            const playerLi = $(selector);
-            if (playerLi.length) {
-                playerLi.find('.mediasoup-video-container').remove();
+            const playerElement = document.querySelector(selector);
+            if (playerElement) {
+                const videoContainer = playerElement.querySelector('.mediasoup-video-container');
+                if (videoContainer) {
+                    videoContainer.remove();
+                }
                 break;
             }
         }
         
         // Also remove any standalone audio elements
-        $(`#mediasoup-consumer-audio-${userId}`).remove();
+        const audioElement = document.getElementById(`mediasoup-consumer-audio-${userId}`);
+        if (audioElement) {
+            audioElement.remove();
+        }
     }
 
     async _populateDeviceSettings() {
