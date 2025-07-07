@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.18](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.17...foundryvtt-mediasoup-webrtc-v0.7.18) (2025-07-07)
+
+
+### Bug Fixes
+
+* **ui:** implement critical UI integration methods to resolve test failures ([#97](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/97)) ([8448141](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/84481419a0cd60b8741c8194fb3f9f27dfaff995))
+
 ## [0.7.17](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.16...foundryvtt-mediasoup-webrtc-v0.7.17) (2025-07-05)
 
 
