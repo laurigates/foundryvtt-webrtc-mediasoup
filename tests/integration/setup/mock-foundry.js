@@ -101,17 +101,80 @@ class MockSettings {
     
     register(module, key, options) {
         const fullKey = `${module}.${key}`;
-        this.settings.set(fullKey, {
-            ...options,
+        
+        // Manually create the setting object to ensure the type field is preserved
+        // Convert function constructors to their string names for cross-boundary compatibility
+        let typeValue = options.type;
+        if (typeof options.type === 'function') {
+            if (options.type === Boolean) typeValue = 'Boolean';
+            else if (options.type === String) typeValue = 'String';
+            else if (options.type === Number) typeValue = 'Number';
+            else typeValue = options.type.name || 'Function';
+        }
+        
+        const setting = {
+            name: options.name,
+            hint: options.hint,
+            scope: options.scope,
+            config: options.config,
+            type: typeValue, // Store converted type
+            default: options.default,
+            choices: options.choices,
+            onChange: options.onChange,
+            key: fullKey,
             value: options.default
+        };
+        
+        // Remove undefined fields
+        Object.keys(setting).forEach(key => {
+            if (setting[key] === undefined) {
+                delete setting[key];
+            }
         });
-        console.log(`[MockFoundry] Registered setting: ${fullKey}`, options);
+        
+        this.settings.set(fullKey, setting);
+        console.log(`[MockFoundry] Registered setting: ${fullKey}`, JSON.stringify(options, (key, value) => {
+            if (typeof value === 'function') {
+                return value.name || 'Function';
+            }
+            return value;
+        }));
     }
     
     registerMenu(module, key, options) {
         const fullKey = `${module}.${key}`;
-        this.menus.set(fullKey, options);
-        console.log(`[MockFoundry] Registered menu: ${fullKey}`, options);
+        
+        // Manually create the menu object to ensure the type field is preserved
+        // Convert function constructors to their string names for cross-boundary compatibility
+        let typeValue = options.type;
+        if (typeof options.type === 'function') {
+            typeValue = options.type.name || 'Function';
+        }
+        
+        const menu = {
+            name: options.name,
+            label: options.label,
+            hint: options.hint,
+            icon: options.icon,
+            type: typeValue, // Store converted type
+            restricted: options.restricted,
+            key: fullKey
+        };
+        
+        // Remove undefined fields
+        Object.keys(menu).forEach(key => {
+            if (menu[key] === undefined) {
+                delete menu[key];
+            }
+        });
+        
+        this.menus.set(fullKey, menu);
+        console.log(`[MockFoundry] Registered menu: ${fullKey}`, JSON.stringify(options, (key, value) => {
+            if (typeof value === 'function') {
+                return value.name || 'Function';
+            }
+            return value;
+        }));
     }
     
     get(module, key) {
@@ -306,6 +369,35 @@ function createMockUI() {
     };
 }
 
+// Mock FoundryVTT FormApplication class
+class MockFormApplication {
+    constructor(options = {}) {
+        this.options = options;
+        this.rendered = false;
+    }
+    
+    render(force = false) {
+        console.log(`[MockFoundry] FormApplication.render(${force})`);
+        this.rendered = true;
+        return this;
+    }
+    
+    close() {
+        console.log('[MockFoundry] FormApplication.close()');
+        this.rendered = false;
+        return Promise.resolve();
+    }
+    
+    static get defaultOptions() {
+        return {
+            classes: [],
+            template: null,
+            width: 'auto',
+            height: 'auto'
+        };
+    }
+}
+
 // Initialize Mock Environment
 export function initializeMockFoundryVTT() {
     console.log('[MockFoundry] Initializing mock FoundryVTT environment...');
@@ -316,6 +408,7 @@ export function initializeMockFoundryVTT() {
     window.game = createMockGame();
     window.ui = createMockUI();
     window.Hooks = new MockHooks();
+    window.FormApplication = MockFormApplication;
     
     // Create basic DOM structure for player list
     const playerListHTML = `
@@ -429,18 +522,21 @@ export function initializeMockFoundryVTT() {
 export function triggerFoundryLifecycle() {
     console.log('[MockFoundry] Triggering FoundryVTT lifecycle events...');
     
-    // Simulate FoundryVTT initialization sequence
+    // Simulate FoundryVTT initialization sequence with shorter delays for testing
     setTimeout(() => {
+        console.log('[MockFoundry] Calling hook: init []');
         window.Hooks.call('init');
+    }, 50);
+    
+    setTimeout(() => {
+        console.log('[MockFoundry] Calling hook: ready []');
+        window.Hooks.call('ready');
     }, 100);
     
     setTimeout(() => {
-        window.Hooks.call('ready');
-    }, 200);
-    
-    setTimeout(() => {
+        console.log('[MockFoundry] Calling hook: getSceneControlButtons [[]]');
         window.Hooks.call('getSceneControlButtons', []);
-    }, 300);
+    }, 150);
 }
 
 // Helper to get test results

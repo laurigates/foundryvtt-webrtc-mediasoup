@@ -1,6 +1,83 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.18](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.17...foundryvtt-mediasoup-webrtc-v0.7.18) (2025-07-07)
+
+
+### Bug Fixes
+
+* **ui:** implement critical UI integration methods to resolve test failures ([#97](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/97)) ([8448141](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/84481419a0cd60b8741c8194fb3f9f27dfaff995))
+
+## [0.7.17](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.16...foundryvtt-mediasoup-webrtc-v0.7.17) (2025-07-05)
+
+
+### Bug Fixes
+
+* enable audio/video stream creation in test mode ([#95](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/95)) ([2761ec9](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/2761ec97d98f3a7aa788eb7ef68650779098d926))
+
+## [0.7.16](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.15...foundryvtt-mediasoup-webrtc-v0.7.16) (2025-07-05)
+
+
+### Bug Fixes
+
+* resolve settings menu registration test failure ([#82](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/82)) ([3f5deae](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/3f5deaefc8be36baca279ba0461e9705018ab4ca)), closes [#66](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/66)
+
+## [0.7.15](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.14...foundryvtt-mediasoup-webrtc-v0.7.15) (2025-07-04)
+
+
+### Bug Fixes
+
+* resolve settings registration test failure ([#80](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/80)) ([4a3abda](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/4a3abdaf558c55e60a2d2f80f9ac68f98f211ebc)), closes [#65](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/65)
+
+## [0.7.14](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.13...foundryvtt-mediasoup-webrtc-v0.7.14) (2025-07-03)
+
+
+### Bug Fixes
+
+* correct FoundryVTT module package structure for proper installation ([#63](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/63)) ([eece9c7](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/eece9c70dc156a9957188aeffb05d8c971078767))
+
+## [0.7.13](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.12...foundryvtt-mediasoup-webrtc-v0.7.13) (2025-07-03)
+
+
+### Bug Fixes
+
+* resolve test environment timing issues and client instantiation failures ([#58](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/58)) ([16911f8](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/16911f8c9e7abbbcab535b0b35641197fc6aac4d))
+
+## [0.7.12](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.11...foundryvtt-mediasoup-webrtc-v0.7.12) (2025-07-02)
+
+
+### Bug Fixes
+
+* improve MediaSoupVTTClient constructor safety ([#55](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/55)) ([6b2fac8](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/6b2fac85b1c29545b363aa9d58e73ef2460efd08))
+
+## [0.7.11](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.10...foundryvtt-mediasoup-webrtc-v0.7.11) (2025-07-02)
+
+
+### Bug Fixes
+
+* resolve module configuration page visibility in FoundryVTT ([#48](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/48)) ([8d66270](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/8d662702a5a46fe719f8bebd68fe2f899b224b2d))
+
+## [0.7.10](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.9...foundryvtt-mediasoup-webrtc-v0.7.10) (2025-07-01)
+
+
+### Bug Fixes
+
+* resolve ESLint line ending errors in GitHub Actions ([#46](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/46)) ([b063b16](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/b063b1680302fc1801b8c3d003b110cad27d4652))
+
+## [0.7.9](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.8...foundryvtt-mediasoup-webrtc-v0.7.9) (2025-07-01)
+
+
+### Bug Fixes
+
+* resolve GitHub Actions failures and ESLint errors ([#44](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/44)) ([984905a](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/984905af3307ede1fa9860d04cb52d1a50b19d5f))
+
+## [0.7.8](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.7...foundryvtt-mediasoup-webrtc-v0.7.8) (2025-06-30)
+
+
+### Bug Fixes
+
+* resolve settings dialog and mediasoup-client loading issues ([ca345e4](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/ca345e4b76ee6a1ed1cffacab4d01e97f5be65df))
+
 ## [0.7.7](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.6...foundryvtt-mediasoup-webrtc-v0.7.7) (2025-06-30)
 
 

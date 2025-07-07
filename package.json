@@ -1,6 +1,6 @@
 {
   "name": "foundryvtt-mediasoup-webrtc",
-  "version": "0.7.7",
+  "version": "0.7.18",
   "description": "WebRTC audio/video communication module for FoundryVTT using MediaSoup SFU server",
   "main": "dist/mediasoup-vtt.js",
   "type": "module",
@@ -52,10 +52,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/foundryvtt-webrtc-mediasoup.git"
+    "url": "git+https://github.com/laurigates/foundryvtt-mediasoup-webrtc.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/foundryvtt-webrtc-mediasoup/issues"
+    "url": "https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues"
   },
-  "homepage": "https://github.com/yourusername/foundryvtt-webrtc-mediasoup#readme"
+  "homepage": "https://github.com/laurigates/foundryvtt-mediasoup-webrtc#readme"
 }

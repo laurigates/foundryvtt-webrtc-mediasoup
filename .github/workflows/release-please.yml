@@ -20,3 +20,55 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          
+      - name: Checkout code
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm ci
+
+      - name: Build module
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm run build
+
+      - name: Generate module.json
+        if: ${{ steps.release.outputs.release_created }}
+        run: npm run process-template
+
+      - name: Create FoundryVTT module zip
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          # The dist/ directory already contains the complete, correct FoundryVTT module structure
+          # Simply copy all contents to create the proper zip structure
+          mkdir -p module-package
+          
+          # Copy entire dist directory contents to package root (this gives us the correct structure)
+          cp -r dist/* module-package/
+          
+          # Override with the root module.json which has the correct version from release-please
+          cp module.json module-package/module.json
+          
+          # List contents for debugging
+          echo "Module package contents:"
+          find module-package -type f
+          
+          # Create the zip from the clean package directory
+          cd module-package
+          zip -r ../mediasoup-vtt.zip .
+
+      - name: Upload FoundryVTT module artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Upload both the module zip and the module.json for the manifest URL
+          gh release upload "${{ steps.release.outputs.tag_name }}" mediasoup-vtt.zip
+          gh release upload "${{ steps.release.outputs.tag_name }}" module-package/module.json --clobber

@@ -59,6 +59,9 @@ Hooks.once('ready', async () => {
     // Create global client instance
     mediaSoupVTTClientInstance = new MediaSoupVTTClient();
     window.MediaSoupVTT_Client = mediaSoupVTTClientInstance;
+    
+    // Update server URL from settings now that they're available
+    mediaSoupVTTClientInstance.updateServerUrl();
 
     // Setup UI hooks
     setupSceneControls();
@@ -86,7 +89,7 @@ Hooks.once('ready', async () => {
                     await mediaSoupVTTClientInstance._populateDeviceSettings();
                 }
             } catch (e) { 
-                log("Error querying permissions on ready: " + e.message, "warn"); 
+                log('Error querying permissions on ready: ' + e.message, 'warn'); 
             }
         }
     }
