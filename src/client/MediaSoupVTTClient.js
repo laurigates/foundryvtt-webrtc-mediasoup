@@ -2,12 +2,12 @@
  * MediaSoup WebRTC Client for FoundryVTT
  */
 
-import { 
-    MODULE_ID, MODULE_TITLE, 
+import {
+    MODULE_ID, MODULE_TITLE,
     SETTING_MEDIASOUP_URL, SETTING_DEFAULT_AUDIO_DEVICE, SETTING_DEFAULT_VIDEO_DEVICE,
     MEDIA_KIND_AUDIO, MEDIA_KIND_VIDEO,
     APP_DATA_TAG_MIC, APP_DATA_TAG_WEBCAM,
-    SIG_MSG_TYPES 
+    SIG_MSG_TYPES
 } from '../constants/index.js';
 import { log } from '../utils/logger.js';
 
@@ -20,9 +20,13 @@ export class MediaSoupVTTClient {
         this.producers = new Map();
         this.consumers = new Map();
 
+        // Optimization: Direct mappings to avoid O(n) lookups
+        this.producerToConsumerMap = new Map(); // producerId -> consumerId for fast lookup
+        this.consumerToUserMap = new Map(); // consumerId -> userId for fast user lookup
+
         // Initialize server URL as empty - will be updated later when settings are available
         this.serverUrl = '';
-        
+
         this.isConnected = false;
         this.isConnecting = false;
         this.requestMap = new Map();
@@ -38,7 +42,7 @@ export class MediaSoupVTTClient {
                 ui.notifications.error(`${MODULE_TITLE}: mediasoup-client library not found! Critical error.`, { permanent: true });
             }
         }
-        
+
         log('MediaSoupVTTClient constructor completed successfully', 'debug');
     }
 
@@ -66,7 +70,7 @@ export class MediaSoupVTTClient {
             ui.notifications.warn(`${MODULE_TITLE}: MediaSoup server URL not configured. Please set it in module settings.`);
             throw new Error(errorMsg);
         }
-        
+
         // Validate URL format
         try {
             const url = new URL(this.serverUrl);
@@ -89,9 +93,28 @@ export class MediaSoupVTTClient {
         this._updateConnectionStatus('connecting');
         log(`Attempting to connect to MediaSoup server at ${this.serverUrl}...`);
 
+        // Create connection timeout - 15 seconds
+        const connectionTimeout = setTimeout(() => {
+            if (this.socket && this.socket.readyState === WebSocket.CONNECTING) {
+                log('WebSocket connection timeout after 15 seconds', 'error', true);
+                ui.notifications.error(`${MODULE_TITLE}: Connection timeout. Check server availability.`);
+
+                // Clean up socket and trigger failure handling
+                this.socket.onopen = null;
+                this.socket.onmessage = null;
+                this.socket.onerror = null;
+                this.socket.onclose = null;
+                this.socket.close();
+                this.socket = null;
+
+                this._handleConnectionFailure();
+            }
+        }, 15000);
+
         try {
             this.socket = new WebSocket(this.serverUrl);
             this.socket.onopen = async () => {
+                clearTimeout(connectionTimeout);
                 log('WebSocket connection established.', 'info');
                 await this._initializeMediasoupDevice();
             };
@@ -105,12 +128,14 @@ export class MediaSoupVTTClient {
                 }
             };
             this.socket.onerror = (error) => {
+                clearTimeout(connectionTimeout);
                 log(`WebSocket error: ${error.message || 'Unknown error'}`, 'error', true);
                 console.error('WebSocket error object:', error);
                 ui.notifications.error(`${MODULE_TITLE}: WebSocket connection error.`);
                 this._handleConnectionFailure();
             };
             this.socket.onclose = (event) => {
+                clearTimeout(connectionTimeout);
                 log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason given'}`, event.wasClean ? 'info' : 'warn');
                 if (!event.wasClean) {
                     ui.notifications.warn(`${MODULE_TITLE}: WebSocket connection closed unexpectedly.`);
@@ -118,6 +143,7 @@ export class MediaSoupVTTClient {
                 this._handleConnectionFailure();
             };
         } catch (error) {
+            clearTimeout(connectionTimeout);
             log(`Failed to initiate WebSocket connection: ${error.message}`, 'error', true);
             ui.notifications.error(`${MODULE_TITLE}: Failed to initiate connection.`);
             this._handleConnectionFailure();
@@ -137,7 +163,7 @@ export class MediaSoupVTTClient {
             this.socket.onmessage = null;
             this.socket.onerror = null;
             this.socket.onclose = null;
-            
+
             if (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING) {
                 this.socket.close();
             }
@@ -149,11 +175,9 @@ export class MediaSoupVTTClient {
 
         this.consumers.forEach(consumer => {
             if (consumer && !consumer.closed) consumer.close();
-            const userStreamData = Array.from(this.remoteUserStreams.entries()).find(
-                ([_uid, data]) => data.audioConsumerId === consumer.id || data.videoConsumerId === consumer.id
-            );
-            if (userStreamData) {
-                const userId = userStreamData[0];
+            // Optimized lookup: Use direct mapping instead of O(n) search
+            const userId = this.consumerToUserMap.get(consumer.id);
+            if (userId) {
                 if (consumer.kind === MEDIA_KIND_AUDIO) {
                     const audioElement = document.getElementById(`mediasoup-consumer-audio-${userId}`);
                     if (audioElement) audioElement.remove();
@@ -162,6 +186,10 @@ export class MediaSoupVTTClient {
             }
         });
         this.consumers.clear();
+
+        // Clear optimization mappings
+        this.producerToConsumerMap.clear();
+        this.consumerToUserMap.clear();
         this.remoteUserStreams.clear();
 
         if (this.sendTransport && !this.sendTransport.closed) {
@@ -271,16 +299,16 @@ export class MediaSoupVTTClient {
             return;
         }
         switch (message.type) {
-        case SIG_MSG_TYPES.NEW_PRODUCER:
-            log(`Server notified of new producer: ${message.producerId} for user ${message.userId} of kind ${message.kind}`, 'info');
-            this._handleNewRemoteProducer(message);
-            break;
-        case SIG_MSG_TYPES.PRODUCER_CLOSED:
-            log(`Server notified producer closed: ${message.producerId}`, 'info');
-            this._handleRemoteProducerClosed(message.producerId);
-            break;
-        default:
-            log(`Received unhandled signaling message type: ${message.type}`, 'warn');
+            case SIG_MSG_TYPES.NEW_PRODUCER:
+                log(`Server notified of new producer: ${message.producerId} for user ${message.userId} of kind ${message.kind}`, 'info');
+                this._handleNewRemoteProducer(message);
+                break;
+            case SIG_MSG_TYPES.PRODUCER_CLOSED:
+                log(`Server notified producer closed: ${message.producerId}`, 'info');
+                this._handleRemoteProducerClosed(message.producerId);
+                break;
+            default:
+                log(`Received unhandled signaling message type: ${message.type}`, 'warn');
         }
     }
 
@@ -289,10 +317,10 @@ export class MediaSoupVTTClient {
             log('Requesting server to create send transport...', 'debug');
             const transportInfo = await this._sendSignalingRequest({
                 type: SIG_MSG_TYPES.CREATE_WEBRTC_TRANSPORT,
-                forceTcp: false, 
+                forceTcp: false,
                 producing: true,
                 consuming: false,
-                sctpCapabilities: this.device.sctpCapabilities 
+                sctpCapabilities: this.device.sctpCapabilities
             });
 
             if (!this.device) throw new Error('Device not initialized for creating send transport.');
@@ -307,7 +335,7 @@ export class MediaSoupVTTClient {
                         transportId: this.sendTransport.id,
                         dtlsParameters
                     });
-                    callback(); 
+                    callback();
                     log('Send transport connected to server.', 'info');
                 } catch (error) {
                     log(`Error connecting send transport: ${error.message}`, 'error');
@@ -323,9 +351,9 @@ export class MediaSoupVTTClient {
                         transportId: this.sendTransport.id,
                         kind,
                         rtpParameters,
-                        appData 
+                        appData
                     });
-                    callback({ id }); 
+                    callback({ id });
                     log(`Successfully produced ${kind} (Producer ID: ${id}, AppData: ${JSON.stringify(appData)})`, 'info');
                 } catch (error) {
                     log(`Error on "produce" event for send transport: ${error.message}`, 'error');
@@ -343,7 +371,7 @@ export class MediaSoupVTTClient {
         } catch (error) {
             log(`Error creating send transport: ${error.message}`, 'error', true);
             ui.notifications.error(`${MODULE_TITLE}: Could not create send transport - ${error.message}`);
-            this._handleConnectionFailure(); 
+            this._handleConnectionFailure();
         }
     }
 
@@ -388,7 +416,7 @@ export class MediaSoupVTTClient {
         } catch (error) {
             log(`Error creating receive transport: ${error.message}`, 'error', true);
             ui.notifications.error(`${MODULE_TITLE}: Could not create receive transport - ${error.message}`);
-            this._handleConnectionFailure(); 
+            this._handleConnectionFailure();
         }
     }
 
@@ -398,16 +426,27 @@ export class MediaSoupVTTClient {
             log('Audio already started.', 'info');
             const producer = this.producers.get(APP_DATA_TAG_MIC);
             if (producer.paused) await this.resumeProducer(producer);
-            return;
+            return {
+                success: true,
+                alreadyStarted: true,
+                hasProducer: true,
+                hasStream: !!this.localAudioStream,
+                producer: producer
+            };
         }
 
         // In test mode, we can capture local streams without full MediaSoup setup
         const canProduce = testMode || (this.isConnected && this.sendTransport && this.device?.canProduce(MEDIA_KIND_AUDIO));
-        
+
         if (!testMode && (!this.isConnected || !this.sendTransport || !this.device?.canProduce(MEDIA_KIND_AUDIO))) {
             log('Cannot start local audio: Not connected, send transport not ready, or cannot produce audio.', 'warn');
             ui.notifications?.warn(`${MODULE_TITLE}: Cannot start audio. Not ready.`);
-            return;
+            return {
+                success: false,
+                error: 'Not connected or cannot produce audio',
+                hasProducer: false,
+                hasStream: false
+            };
         }
 
         log('Starting local audio capture...', 'info');
@@ -424,7 +463,7 @@ export class MediaSoupVTTClient {
             if (canProduce && this.sendTransport) {
                 const producer = await this.sendTransport.produce({
                     track,
-                    appData: { mediaTag: APP_DATA_TAG_MIC, userId: game.userId } 
+                    appData: { mediaTag: APP_DATA_TAG_MIC, userId: game.userId }
                 });
                 this.producers.set(APP_DATA_TAG_MIC, producer);
                 log(`Audio producer created (ID: ${producer.id})`, 'info');
@@ -432,7 +471,7 @@ export class MediaSoupVTTClient {
 
                 producer.on('trackended', () => {
                     log('Audio track ended (e.g., device unplugged).', 'warn');
-                    this.stopLocalAudio(true); 
+                    this.stopLocalAudio(true);
                 });
                 producer.on('transportclose', () => {
                     log('Audio producer transport closed.', 'warn');
@@ -447,13 +486,27 @@ export class MediaSoupVTTClient {
                 log('Audio stream captured successfully (test mode - no producer created)', 'info');
             }
 
+            return {
+                success: true,
+                hasProducer: this.producers.has(APP_DATA_TAG_MIC),
+                hasStream: !!this.localAudioStream,
+                testMode,
+                producer: this.producers.get(APP_DATA_TAG_MIC) || null
+            };
+
         } catch (error) {
             log(`Error starting local audio: ${error.message}`, 'error', true);
             ui?.notifications?.error(`${MODULE_TITLE}: Could not start microphone - ${error.message}`);
-            if (this.localAudioStream) { 
-                this.localAudioStream.getTracks().forEach(t => t.stop()); 
-                this.localAudioStream = null; 
+            if (this.localAudioStream) {
+                this.localAudioStream.getTracks().forEach(t => t.stop());
+                this.localAudioStream = null;
             }
+            return {
+                success: false,
+                error: error.message,
+                hasProducer: false,
+                hasStream: false
+            };
         }
     }
 
@@ -465,9 +518,9 @@ export class MediaSoupVTTClient {
         }
         log('Stopping local audio...', 'info');
         if (!producer.closed) {
-            producer.close(); 
+            producer.close();
         }
-        
+
         if (this.producers.has(APP_DATA_TAG_MIC)) {
             this.producers.delete(APP_DATA_TAG_MIC);
             this._updateMediaButtonState(APP_DATA_TAG_MIC, false, false);
@@ -486,12 +539,36 @@ export class MediaSoupVTTClient {
             await this.startLocalAudio();
             return { success: true, hasProducer: this.producers.has(APP_DATA_TAG_MIC) };
         }
-        if (producer.paused) {
-            await this.resumeProducer(producer);
-        } else {
-            await this.pauseProducer(producer);
+
+        const wasUnmuted = !producer.paused;
+        log(`Toggling audio mute. Current state: ${wasUnmuted ? 'unmuted' : 'muted'}`, 'debug');
+
+        try {
+            if (producer.paused) {
+                await this.resumeProducer(producer);
+                log('Audio unmuted successfully', 'info');
+            } else {
+                await this.pauseProducer(producer);
+                log('Audio muted successfully', 'info');
+            }
+
+            // Verify final state and ensure UI is synchronized
+            const finalState = !producer.paused;
+            this._updateMediaButtonState(APP_DATA_TAG_MIC, true, producer.paused);
+
+            return {
+                success: true,
+                hasProducer: true,
+                wasUnmuted,
+                isUnmuted: finalState
+            };
+
+        } catch (error) {
+            log(`Error toggling audio mute: ${error.message}`, 'error');
+            // Restore UI state based on actual producer state
+            this._updateMediaButtonState(APP_DATA_TAG_MIC, true, producer.paused);
+            return { success: false, hasProducer: true, error: error.message };
         }
-        return { success: true, hasProducer: true };
     }
 
     async startLocalVideo(testMode = false) {
@@ -500,16 +577,27 @@ export class MediaSoupVTTClient {
             log('Video already started.', 'info');
             const producer = this.producers.get(APP_DATA_TAG_WEBCAM);
             if (producer.paused) await this.resumeProducer(producer);
-            return;
+            return {
+                success: true,
+                alreadyStarted: true,
+                hasProducer: true,
+                hasStream: !!this.localVideoStream,
+                producer: producer
+            };
         }
 
         // In test mode, we can capture local streams without full MediaSoup setup
         const canProduce = testMode || (this.isConnected && this.sendTransport && this.device?.canProduce(MEDIA_KIND_VIDEO));
-        
+
         if (!testMode && (!this.isConnected || !this.sendTransport || !this.device?.canProduce(MEDIA_KIND_VIDEO))) {
             log('Cannot start local video: Not connected, send transport not ready, or cannot produce video.', 'warn');
             ui.notifications?.warn(`${MODULE_TITLE}: Cannot start video. Not ready.`);
-            return;
+            return {
+                success: false,
+                error: 'Not connected or cannot produce video',
+                hasProducer: false,
+                hasStream: false
+            };
         }
 
         log('Starting local video capture...', 'info');
@@ -553,14 +641,28 @@ export class MediaSoupVTTClient {
                 this._displayLocalVideoPreview(this.localVideoStream);
             }
 
+            return {
+                success: true,
+                hasProducer: this.producers.has(APP_DATA_TAG_WEBCAM),
+                hasStream: !!this.localVideoStream,
+                testMode,
+                producer: this.producers.get(APP_DATA_TAG_WEBCAM) || null
+            };
+
         } catch (error) {
             log(`Error starting local video: ${error.message}`, 'error', true);
             ui?.notifications?.error(`${MODULE_TITLE}: Could not start webcam - ${error.message}`);
-            if (this.localVideoStream) { 
-                this.localVideoStream.getTracks().forEach(t => t.stop()); 
-                this.localVideoStream = null; 
+            if (this.localVideoStream) {
+                this.localVideoStream.getTracks().forEach(t => t.stop());
+                this.localVideoStream = null;
             }
             this._removeLocalVideoPreview();
+            return {
+                success: false,
+                error: error.message,
+                hasProducer: false,
+                hasStream: false
+            };
         }
     }
 
@@ -574,7 +676,7 @@ export class MediaSoupVTTClient {
         if (!producer.closed) {
             producer.close();
         }
-        
+
         if (this.producers.has(APP_DATA_TAG_WEBCAM)) {
             this.producers.delete(APP_DATA_TAG_WEBCAM);
             this._updateMediaButtonState(APP_DATA_TAG_WEBCAM, false, false);
@@ -589,17 +691,17 @@ export class MediaSoupVTTClient {
 
     async toggleVideoEnabled() {
         const producer = this.producers.get(APP_DATA_TAG_WEBCAM);
-        if (!producer || producer.closed) { 
+        if (!producer || producer.closed) {
             log('No active video producer to toggle. Attempting to start video.', 'info');
             await this.startLocalVideo();
             return;
         }
         if (producer.paused) {
             await this.resumeProducer(producer);
-            this._displayLocalVideoPreview(this.localVideoStream); 
-        } else { 
+            this._displayLocalVideoPreview(this.localVideoStream);
+        } else {
             await this.pauseProducer(producer);
-            this._removeLocalVideoPreview(); 
+            this._removeLocalVideoPreview();
         }
     }
 
@@ -610,7 +712,7 @@ export class MediaSoupVTTClient {
             await producer.pause();
             log(`Producer ${producer.id} paused.`, 'info');
             this._updateMediaButtonState(producer.appData.mediaTag, true, true);
-            
+
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                 this._sendSignalingRequest({ type: SIG_MSG_TYPES.PAUSE_PRODUCER, producerId: producer.id })
                     .catch(e => log(`Error notifying server of producer pause: ${e.message}`, 'warn'));
@@ -627,7 +729,7 @@ export class MediaSoupVTTClient {
             await producer.resume();
             log(`Producer ${producer.id} resumed.`, 'info');
             this._updateMediaButtonState(producer.appData.mediaTag, true, false);
-            
+
             if (this.socket && this.socket.readyState === WebSocket.OPEN) {
                 this._sendSignalingRequest({ type: SIG_MSG_TYPES.RESUME_PRODUCER, producerId: producer.id })
                     .catch(e => log(`Error notifying server of producer resume: ${e.message}`, 'warn'));
@@ -642,7 +744,7 @@ export class MediaSoupVTTClient {
             log(`Skipping consumption of own producer ${producerId}`, 'debug');
             return;
         }
-        
+
         if (!appData || !appData.rtpParameters) {
             const errorMsg = `Cannot consume producer ${producerId}: Missing rtpParameters in appData from server notification.`;
             log(errorMsg, 'error');
@@ -678,6 +780,11 @@ export class MediaSoupVTTClient {
             });
 
             this.consumers.set(consumer.id, consumer);
+
+            // Update optimization mappings for O(1) lookups
+            this.producerToConsumerMap.set(producerId, consumer.id);
+            this.consumerToUserMap.set(consumer.id, userId);
+
             log(`Consumer created (ID: ${consumer.id}, Kind: ${kind}) for producer ${producerId}`, 'info');
 
             let userStreams = this.remoteUserStreams.get(userId) || {};
@@ -719,16 +826,9 @@ export class MediaSoupVTTClient {
     }
 
     _handleRemoteProducerClosed(producerId) {
-        let consumerToClose = null;
-        let consumerIdToRemove = null;
-
-        for (const [cId, c] of this.consumers) {
-            if (c.producerId === producerId) {
-                consumerToClose = c;
-                consumerIdToRemove = cId;
-                break;
-            }
-        }
+        // Optimized O(1) lookup instead of O(n) search
+        const consumerIdToRemove = this.producerToConsumerMap.get(producerId);
+        const consumerToClose = consumerIdToRemove ? this.consumers.get(consumerIdToRemove) : null;
 
         if (consumerToClose) {
             log(`Closing consumer ${consumerToClose.id} for remote producer ${producerId}`, 'info');
@@ -736,6 +836,10 @@ export class MediaSoupVTTClient {
                 consumerToClose.close();
             }
             this.consumers.delete(consumerIdToRemove);
+
+            // Clean up optimization mappings
+            this.producerToConsumerMap.delete(producerId);
+            this.consumerToUserMap.delete(consumerIdToRemove);
 
             const userId = consumerToClose.appData.userId;
             const kind = consumerToClose.kind;
@@ -774,14 +878,14 @@ export class MediaSoupVTTClient {
             statusElement.textContent = status;
             statusElement.className = `mediasoup-status ${status.toLowerCase()}`;
         }
-        
+
         // Update scene controls if they exist
         const connectButton = document.querySelector('[data-tool="mediasoup-connect"]');
         if (connectButton) {
             connectButton.classList.toggle('active', status === 'connected');
             connectButton.title = `MediaSoup: ${status}`;
         }
-        
+
         log(`Connection status updated: ${status}`, 'debug');
     }
 
@@ -789,34 +893,34 @@ export class MediaSoupVTTClient {
         // Update scene control buttons for audio/video state
         const buttonSelector = `[data-tool="mediasoup-${mediaTag}"]`;
         const button = document.querySelector(buttonSelector);
-        
+
         if (button) {
             button.classList.toggle('active', isActive);
             button.classList.toggle('paused', isPaused);
-            
+
             // Update button title/tooltip
             let status = 'off';
             if (isActive && isPaused) status = 'paused';
             else if (isActive) status = 'on';
-            
+
             button.title = `${mediaTag}: ${status}`;
-            
+
             // Update icon if it exists
             const icon = button.querySelector('i');
             if (icon) {
                 icon.className = `fas fa-${mediaTag === 'audio' ? 'microphone' : 'video'}${isActive ? (isPaused ? '-slash' : '') : '-slash'}`;
             }
         }
-        
+
         log(`Media button state updated: ${mediaTag} - active: ${isActive}, paused: ${isPaused}`, 'debug');
     }
 
     _displayLocalVideoPreview(stream) {
         // Remove existing preview
         this._removeLocalVideoPreview();
-        
+
         if (!stream) return;
-        
+
         // Create video preview element
         const videoPreview = document.createElement('video');
         videoPreview.id = 'mediasoup-local-video-preview';
@@ -825,10 +929,10 @@ export class MediaSoupVTTClient {
         videoPreview.playsInline = true;
         videoPreview.muted = true;
         videoPreview.srcObject = stream;
-        
+
         // Add to document body
         document.body.appendChild(videoPreview);
-        
+
         log('Local video preview displayed', 'debug');
     }
 
@@ -837,8 +941,9 @@ export class MediaSoupVTTClient {
         if (videoPreview) {
             // Stop all tracks if srcObject exists
             if (videoPreview.srcObject) {
-                const tracks = videoPreview.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
+                // Just clear the srcObject to release the element's reference to the stream,
+                // but don't stop the tracks as they may still be used by the WebRTC producer.
+                videoPreview.srcObject = null;
             }
             videoPreview.remove();
             log('Local video preview removed', 'debug');
@@ -853,7 +958,7 @@ export class MediaSoupVTTClient {
             `.players-list li[data-user-id="${userId}"]`,
             `.players-list .player[data-user-id="${userId}"]`
         ];
-        
+
         for (const selector of playerSelectors) {
             const playerElement = document.querySelector(selector);
             if (playerElement) {
@@ -864,7 +969,7 @@ export class MediaSoupVTTClient {
                 break;
             }
         }
-        
+
         // Also remove any standalone audio elements
         const audioElement = document.getElementById(`mediasoup-consumer-audio-${userId}`);
         if (audioElement) {
@@ -873,7 +978,55 @@ export class MediaSoupVTTClient {
     }
 
     async _populateDeviceSettings() {
-        // This method is called but implementation is handled in UI modules
-        // Keeping as placeholder for interface compatibility
+        log('Populating device settings...', 'debug');
+        try {
+            // Request temporary permissions to get device labels if not already granted
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                stream.getTracks().forEach(track => track.stop());
+            } catch (permError) {
+                log(`Could not request permissions for device enumeration: ${permError.message}`, 'debug');
+                // Continue anyway - we'll get device IDs without labels
+            }
+
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioDevices = { 'default': 'Browser Default' };
+            const videoDevices = { 'default': 'Browser Default' };
+
+            let audioCount = 1;
+            let videoCount = 1;
+
+            devices.forEach(device => {
+                if (device.kind === 'audioinput' && device.deviceId) {
+                    const label = device.label || `Microphone ${audioCount++}`;
+                    audioDevices[device.deviceId] = label;
+                } else if (device.kind === 'videoinput' && device.deviceId) {
+                    const label = device.label || `Camera ${videoCount++}`;
+                    videoDevices[device.deviceId] = label;
+                }
+            });
+
+            // Store for future reference
+            this.availableAudioDevices = audioDevices;
+            this.availableVideoDevices = videoDevices;
+
+            // Update FoundryVTT game settings choices
+            const audioSetting = game.settings.settings.get(`${MODULE_ID}.${SETTING_DEFAULT_AUDIO_DEVICE}`);
+            if (audioSetting) {
+                audioSetting.choices = audioDevices;
+            }
+
+            const videoSetting = game.settings.settings.get(`${MODULE_ID}.${SETTING_DEFAULT_VIDEO_DEVICE}`);
+            if (videoSetting) {
+                videoSetting.choices = videoDevices;
+            }
+
+            log(`Device settings populated successfully. Audio devices: ${Object.keys(audioDevices).length}, Video devices: ${Object.keys(videoDevices).length}`, 'info');
+        } catch (error) {
+            log(`Error populating device settings: ${error.message}`, 'warn');
+            // Set defaults if enumeration fails
+            this.availableAudioDevices = { 'default': 'Browser Default' };
+            this.availableVideoDevices = { 'default': 'Browser Default' };
+        }
     }
 }
