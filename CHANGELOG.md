@@ -1,6 +1,34 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.18](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.17...foundryvtt-mediasoup-webrtc-v0.7.18) (2025-07-07)
+
+
+### Bug Fixes
+
+* **ui:** implement critical UI integration methods to resolve test failures ([#97](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/97)) ([8448141](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/84481419a0cd60b8741c8194fb3f9f27dfaff995))
+
+## [0.7.17](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.16...foundryvtt-mediasoup-webrtc-v0.7.17) (2025-07-05)
+
+
+### Bug Fixes
+
+* enable audio/video stream creation in test mode ([#95](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/95)) ([2761ec9](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/2761ec97d98f3a7aa788eb7ef68650779098d926))
+
+## [0.7.16](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.15...foundryvtt-mediasoup-webrtc-v0.7.16) (2025-07-05)
+
+
+### Bug Fixes
+
+* resolve settings menu registration test failure ([#82](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/82)) ([3f5deae](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/3f5deaefc8be36baca279ba0461e9705018ab4ca)), closes [#66](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/66)
+
+## [0.7.15](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.14...foundryvtt-mediasoup-webrtc-v0.7.15) (2025-07-04)
+
+
+### Bug Fixes
+
+* resolve settings registration test failure ([#80](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/80)) ([4a3abda](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/4a3abdaf558c55e60a2d2f80f9ac68f98f211ebc)), closes [#65](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/65)
+
 ## [0.7.14](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.13...foundryvtt-mediasoup-webrtc-v0.7.14) (2025-07-03)
 
 
