@@ -281,41 +281,61 @@ test.describe('MediaSoup WebRTC Media', () => {
     // Mock getUserMedia to throw errors
     await page.evaluate(() => {
       navigator.mediaDevices.getUserMedia = async (constraints) => {
+        console.log('Mock getUserMedia called with constraints:', constraints);
         if (constraints.audio) {
+          console.log('Throwing audio error');
           throw new Error('NotAllowedError: Audio access denied');
         }
         if (constraints.video) {
+          console.log('Throwing video error');
           throw new Error('NotFoundError: No video devices found');
         }
+        console.log('Throwing unknown error');
         throw new Error('Unknown media error');
       };
     });
     
     // Clear notifications
-    await page.evaluate(() => window.ui.notifications.clear());
+    await page.evaluate(() => {
+      console.log('Clearing notifications');
+      window.ui.notifications.clear();
+    });
     
-    // Try to start audio (should fail gracefully)
+    // Try to start audio (should fail gracefully) - use test mode to bypass connection checks
     await page.evaluate(async () => {
+      console.log('About to call startLocalAudio with testMode=true');
       try {
-        await window.MediaSoupVTT_Client.startLocalAudio();
+        const result = await window.MediaSoupVTT_Client.startLocalAudio(true);
+        console.log('startLocalAudio result:', result);
       } catch (error) {
-        // Expected
+        console.log('startLocalAudio threw error:', error.message);
       }
     });
     
-    // Try to start video (should fail gracefully)
+    // Check notifications after audio attempt
+    const audioNotifications = await page.evaluate(() => {
+      const notifications = window.ui.notifications.getByType('error');
+      console.log('Notifications after audio attempt:', notifications.length);
+      return notifications;
+    });
+    
+    // Try to start video (should fail gracefully) - use test mode to bypass connection checks
     await page.evaluate(async () => {
+      console.log('About to call startLocalVideo with testMode=true');
       try {
-        await window.MediaSoupVTT_Client.startLocalVideo();
+        const result = await window.MediaSoupVTT_Client.startLocalVideo(true);
+        console.log('startLocalVideo result:', result);
       } catch (error) {
-        // Expected  
+        console.log('startLocalVideo threw error:', error.message);
       }
     });
     
     // Should have error notifications
-    const notifications = await page.evaluate(() => 
-      window.ui.notifications.getByType('error')
-    );
+    const notifications = await page.evaluate(() => {
+      const notifications = window.ui.notifications.getByType('error');
+      console.log('Final notifications:', notifications.length, notifications);
+      return notifications;
+    });
     
     expect(notifications.length).toBeGreaterThan(0);
   });
