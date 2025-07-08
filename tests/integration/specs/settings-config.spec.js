@@ -217,35 +217,26 @@ test.describe('MediaSoup Settings Configuration', () => {
   });
   
   test('should handle settings change callbacks', async () => {
-    // Track setting changes
+    // Track setting changes by hooking into the existing onChange callback
     await page.evaluate(() => {
       window.testSettingChanges = [];
       
-      // Override setting registration to capture onChange callbacks
-      const originalRegister = window.game.settings.register;
-      window.game.settings.register = function(module, key, options) {
-        if (options.onChange) {
-          const originalOnChange = options.onChange;
-          options.onChange = function(value) {
-            window.testSettingChanges.push({ module, key, value });
-            return originalOnChange.call(this, value);
-          };
-        }
-        return originalRegister.call(this, module, key, options);
-      };
+      // Get the existing setting and wrap its onChange callback
+      const setting = window.game.settings.settings.get('mediasoup-vtt.mediaSoupServerUrl');
+      if (setting && setting.onChange) {
+        const originalOnChange = setting.onChange;
+        setting.onChange = function(value) {
+          window.testSettingChanges.push({ 
+            module: 'mediasoup-vtt', 
+            key: 'mediaSoupServerUrl', 
+            value: value 
+          });
+          return originalOnChange.call(this, value);
+        };
+      }
     });
     
-    // Re-initialize plugin to register settings with tracking
-    await page.evaluate(() => {
-      // Clear existing settings
-      window.game.settings.settings.clear();
-      window.game.settings.menus.clear();
-    });
-    
-    await page.click('#btn-init-plugin');
-    await page.waitForFunction(() => window.MediaSoupVTT_Client);
-    
-    // Change a setting
+    // Change a setting to trigger the onChange callback
     await page.evaluate(() => {
       window.game.settings.set('mediasoup-vtt', 'mediaSoupServerUrl', 'wss://test-change.com:4443');
     });

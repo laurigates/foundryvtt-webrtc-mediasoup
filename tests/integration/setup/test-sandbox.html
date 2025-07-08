@@ -356,6 +356,21 @@
         });
         
         document.getElementById('btn-open-settings').addEventListener('click', () => {
+            // Populate settings modal with current values from game.settings
+            if (window.game && window.game.settings) {
+                try {
+                    const serverUrl = window.game.settings.get('mediasoup-vtt', 'mediaSoupServerUrl') || '';
+                    const autoConnect = window.game.settings.get('mediasoup-vtt', 'autoConnect') || false;
+                    
+                    document.getElementById('server-url').value = serverUrl;
+                    document.getElementById('auto-connect').checked = autoConnect;
+                    
+                    addLogEntry('info', 'Settings modal populated with current values', { serverUrl, autoConnect });
+                } catch (error) {
+                    addLogEntry('warn', 'Could not load current settings values', error);
+                }
+            }
+            
             document.getElementById('modal-overlay').classList.add('visible');
             document.getElementById('settings-modal').classList.add('visible');
             addLogEntry('info', 'Opened settings modal');
