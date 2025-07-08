@@ -1,6 +1,14 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.19](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.18...foundryvtt-mediasoup-webrtc-v0.7.19) (2025-07-08)
+
+
+### Bug Fixes
+
+* **client:** resolve media access error handling issues ([#102](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/102)) ([4603b43](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/4603b43167d3126fb44e84897a2b317161149cee))
+* **settings:** resolve settings configuration and callback issues ([#104](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/issues/104)) ([86113ee](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/86113ee930b1cd18979b622044cbc065e9432f61))
+
 ## [0.7.18](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.17...foundryvtt-mediasoup-webrtc-v0.7.18) (2025-07-07)
 
 
