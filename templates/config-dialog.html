@@ -3,14 +3,14 @@
         <h3>MediaSoup Server Configuration</h3>
         
         <div class="mediasoup-form-group">
-            <label for="serverUrl">Server WebSocket URL:</label>
-            <input type="text" name="serverUrl" value="{{serverUrl}}" placeholder="wss://your-server.com:4443" />
+            <label for="server-url">Server WebSocket URL:</label>
+            <input type="text" id="server-url" name="serverUrl" value="{{serverUrl}}" placeholder="wss://your-server.com:4443" />
             <p class="notes">Enter the WebSocket URL for your MediaSoup server (e.g., wss://your-server.com:4443)</p>
         </div>
         
         <div class="mediasoup-form-group">
             <label>
-                <input type="checkbox" name="autoConnect" {{#if autoConnect}}checked{{/if}} />
+                <input type="checkbox" id="auto-connect" name="autoConnect" {{#if autoConnect}}checked{{/if}} />
                 Auto-connect to MediaSoup Server
             </label>
             <p class="notes">Automatically connect when joining a world</p>
