@@ -496,7 +496,7 @@ export class MediaSoupVTTClient {
 
         } catch (error) {
             log(`Error starting local audio: ${error.message}`, 'error', true);
-            ui?.notifications?.error(`${MODULE_TITLE}: Could not start microphone - ${error.message}`);
+            ui.notifications.error(`${MODULE_TITLE}: Could not start microphone - ${error.message}`);
             if (this.localAudioStream) {
                 this.localAudioStream.getTracks().forEach(t => t.stop());
                 this.localAudioStream = null;
@@ -651,7 +651,7 @@ export class MediaSoupVTTClient {
 
         } catch (error) {
             log(`Error starting local video: ${error.message}`, 'error', true);
-            ui?.notifications?.error(`${MODULE_TITLE}: Could not start webcam - ${error.message}`);
+            ui.notifications.error(`${MODULE_TITLE}: Could not start webcam - ${error.message}`);
             if (this.localVideoStream) {
                 this.localVideoStream.getTracks().forEach(t => t.stop());
                 this.localVideoStream = null;
