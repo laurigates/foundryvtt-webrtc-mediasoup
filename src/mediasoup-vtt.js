@@ -12,6 +12,7 @@ import { setupSceneControls } from './ui/sceneControls.js';
 import mediasoupClient from 'mediasoup-client';
 import { setupPlayerListHooks } from './ui/playerList.js';
 import { injectStyles } from './ui/styles.js';
+import { MediaSoupConfigDialog } from './ui/configDialog.js';
 
 // Expose mediasoup-client to global scope for FoundryVTT compatibility
 window.mediasoupClient = mediasoupClient;
@@ -46,6 +47,16 @@ Hooks.once('init', () => {
 
 Hooks.once('ready', async () => {
     log('Foundry VTT is ready. MediaSoupVTT is active.', 'info', true);
+    
+    // Register configuration menu now that FormApplication is available
+    game.settings.registerMenu(MODULE_ID, 'configDialog', {
+        name: 'MediaSoup Server Configuration',
+        label: 'Configure MediaSoup Server',
+        hint: 'Open the comprehensive configuration dialog with setup instructions.',
+        icon: 'fas fa-cogs',
+        type: MediaSoupConfigDialog,
+        restricted: false
+    });
     
     // mediasoup-client should now be bundled with the plugin
     if (!window.mediasoupClient) {
