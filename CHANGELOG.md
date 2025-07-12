@@ -1,6 +1,13 @@
 # Changelog
 
 <<<<<<< Updated upstream
+## [0.7.20](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.19...foundryvtt-mediasoup-webrtc-v0.7.20) (2025-07-12)
+
+
+### Bug Fixes
+
+* **settings:** resolve FormApplication timing issue preventing settings visibility ([83cee0f](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/commit/83cee0fdab6ed008d964e62820045249db9a88fe))
+
 ## [0.7.19](https://github.com/laurigates/foundryvtt-mediasoup-webrtc/compare/foundryvtt-mediasoup-webrtc-v0.7.18...foundryvtt-mediasoup-webrtc-v0.7.19) (2025-07-08)
 
 
