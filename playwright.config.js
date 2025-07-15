@@ -22,7 +22,12 @@ export default defineConfig({
   workers: 1,
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
+  reporter: process.env.CI ? [
+    ['list'],
+    ['github'],
+    ['json', { outputFile: 'tests/results/results.json' }],
+    ['junit', { outputFile: 'tests/results/junit.xml' }]
+  ] : [
     ['html', { outputFolder: 'tests/results/html-report' }],
     ['json', { outputFile: 'tests/results/results.json' }],
     ['junit', { outputFile: 'tests/results/junit.xml' }]
@@ -78,20 +83,19 @@ export default defineConfig({
       },
     },
     
-    // Disable other browsers for now due to large bundle causing instability
-    // {
-    //   name: 'firefox-webrtc',
-    //   use: { 
-    //     ...devices['Desktop Firefox'],
-    //     launchOptions: {
-    //       firefoxUserPrefs: {
-    //         'media.navigator.streams.fake': true,
-    //         'media.navigator.permission.disabled': true,
-    //       }
-    //     },
-    //     permissions: ['camera', 'microphone'],
-    //   },
-    // },
+    {
+      name: 'firefox-webrtc',
+      use: { 
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          firefoxUserPrefs: {
+            'media.navigator.streams.fake': true,
+            'media.navigator.permission.disabled': true,
+          }
+        },
+        permissions: ['camera', 'microphone'],
+      },
+    },
   ],
 
   /* Global setup and teardown */
