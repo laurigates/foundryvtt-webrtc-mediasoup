@@ -23,6 +23,9 @@ help:
 	@echo "  test-verbose - Run all tests with detailed output"
 	@echo "  test-ui     - Run tests with UI (opens browser report)"
 	@echo "  test-headed - Run tests in headed browser mode"
+	@echo "  test-ci     - Run tests in CI mode (matches CI environment)"
+	@echo "  test-chromium - Run tests in Chromium only"
+	@echo "  test-firefox - Run tests in Firefox only"
 	@echo "  coverage    - Run tests with coverage report"
 	@echo ""
 	@echo "Code Quality & QA:"
@@ -72,7 +75,7 @@ clean:
 package: build
 	npm run package
 
-# Run all tests (no browser report)
+# Run all tests (no browser report, matches CI)
 test:
 	npm test -- --reporter=list
 
@@ -87,6 +90,17 @@ test-ui:
 # Run tests in headed browser mode (for debugging)
 test-headed:
 	npm test -- --headed
+
+# Run tests with CI environment (matches CI exactly)
+test-ci:
+	CI=true npm test
+
+# Run tests for specific browser
+test-chromium:
+	npm test -- --project=chromium-webrtc
+
+test-firefox:
+	npm test -- --project=firefox-webrtc
 
 # Run tests with coverage (if configured)
 coverage:
