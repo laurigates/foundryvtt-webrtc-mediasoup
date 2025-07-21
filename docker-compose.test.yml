@@ -40,7 +40,7 @@ services:
 
   # Playwright test runner
   playwright-tests:
-    image: mcr.microsoft.com/playwright:v1.40.0-focal
+    image: mcr.microsoft.com/playwright:v1.54.1-focal
     working_dir: /app
     volumes:
       - .:/app

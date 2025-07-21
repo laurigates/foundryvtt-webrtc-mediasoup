@@ -89,7 +89,7 @@ jobs:
         fi
       
     - name: Run integration tests
-      run: npx playwright test --project=${{ matrix.browser }}-webrtc --reporter=list,github
+      run: npx playwright test --project=${{ matrix.browser }}-webrtc
       env:
         CI: true
         WEBRTC_DEBUG: false
@@ -219,9 +219,6 @@ jobs:
       
     - name: Run npm audit
       run: npm audit --audit-level=moderate
-      
-    - name: Check for known vulnerabilities
-      run: npx audit-ci --moderate
       
     - name: Install Rust for server audit
       if: hashFiles('server/Cargo.toml') != ''
