@@ -7,27 +7,63 @@ import { test, expect } from '@playwright/test';
  * in a mock FoundryVTT environment.
  */
 
+/**
+ * Helper function for CI-aware waiting with improved polling and timeout handling
+ */
+async function waitForClientWithRetry(page, options = {}) {
+  const isCI = !!process.env.CI;
+  const timeout = options.timeout || (isCI ? 90000 : 30000); // 90s in CI, 30s locally
+  const polling = isCI ? 2000 : 500; // Slower polling in CI to reduce resource pressure
+  
+  return page.waitForFunction(
+    () => {
+      const hasClient = !!window.MediaSoupVTT_Client;
+      const isCorrectType = hasClient && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient';
+      const hasRequiredMethods = hasClient && typeof window.MediaSoupVTT_Client.updateServerUrl === 'function';
+      
+      // Log progress in CI for debugging
+      if (window.location.search.includes('ci-debug')) {
+        console.log(`[CI-Debug] Client check: hasClient=${hasClient}, isCorrectType=${isCorrectType}, hasRequiredMethods=${hasRequiredMethods}`);
+      }
+      
+      return hasClient && isCorrectType && hasRequiredMethods;
+    },
+    { 
+      timeout,
+      polling: polling
+    }
+  );
+}
+
 test.describe('MediaSoup Plugin Loading', () => {
   let page;
   
   test.beforeEach(async ({ browser }) => {
     try {
+      const isCI = !!process.env.CI;
+      const setupTimeout = isCI ? 60000 : 30000; // 60s in CI, 30s locally
+      
       page = await browser.newPage();
       
-      // Set default timeout for mock environment
-      page.setDefaultTimeout(30000);
+      // Set CI-aware default timeout for mock environment
+      page.setDefaultTimeout(setupTimeout);
       
-      // Navigate to test sandbox
+      // Navigate to test sandbox with CI-aware timeout
       await page.goto('/tests/integration/setup/test-sandbox.html', { 
         waitUntil: 'domcontentloaded',
-        timeout: 30000 
+        timeout: setupTimeout 
       });
       
-      // Wait for mock environment to initialize
-      await page.waitForFunction(() => window.testSandbox && window.game, { timeout: 15000 });
+      // Wait for mock environment to initialize with CI-aware timeout
+      await page.waitForFunction(() => window.testSandbox && window.game, { 
+        timeout: setupTimeout,
+        polling: isCI ? 1000 : 500 // Slower polling in CI
+      });
       
-      // Verify mock environment is ready
-      await expect(page.locator('#test-status')).toContainText('Ready for testing', { timeout: 15000 });
+      // Verify mock environment is ready with CI-aware timeout
+      await expect(page.locator('#test-status')).toContainText('Ready for testing', { 
+        timeout: setupTimeout 
+      });
     } catch (error) {
       console.error('BeforeEach setup failed:', error);
       if (page) {
@@ -74,8 +110,12 @@ test.describe('MediaSoup Plugin Loading', () => {
     // Click initialize plugin - this should load the mock mediasoup-client
     await page.click('#btn-init-plugin');
     
-    // Wait for mock library to be exposed
-    await page.waitForFunction(() => window.mediasoupClient, { timeout: 10000 });
+    // Wait for mock library to be exposed with CI-aware timeout
+    const isCI = !!process.env.CI;
+    await page.waitForFunction(() => window.mediasoupClient, { 
+      timeout: isCI ? 30000 : 10000,
+      polling: isCI ? 1000 : 500
+    });
     
     // Wait a bit for initialization to complete
     await page.waitForTimeout(1000);
@@ -125,8 +165,12 @@ test.describe('MediaSoup Plugin Loading', () => {
     // Click the initialize plugin button
     await page.click('#btn-init-plugin');
     
-    // Wait for mediasoup-client mock to be loaded first
-    await page.waitForFunction(() => window.mediasoupClient, { timeout: 5000 });
+    // Wait for mediasoup-client mock to be loaded first with CI-aware timeout
+    const isCI = !!process.env.CI;
+    await page.waitForFunction(() => window.mediasoupClient, { 
+      timeout: isCI ? 20000 : 5000,
+      polling: isCI ? 1000 : 500
+    });
     
     // Add debugging information about what's happening
     const debugInfo = await page.evaluate(() => {
@@ -143,29 +187,9 @@ test.describe('MediaSoup Plugin Loading', () => {
     
     console.log('Debug info before waiting for client:', debugInfo);
     
-    // Try to wait for client creation with detailed debugging
+    // Use the improved CI-aware waiting function
     try {
-      await page.waitForFunction(
-        () => {
-          // Add detailed logging in the browser
-          if (!window.debugCounter) window.debugCounter = 0;
-          window.debugCounter++;
-          
-          const hasClient = !!window.MediaSoupVTT_Client;
-          const isCorrectType = hasClient && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient';
-          const hasRequiredMethods = hasClient && typeof window.MediaSoupVTT_Client.updateServerUrl === 'function';
-          
-          if (window.debugCounter % 10 === 0) {
-            console.log(`Debug ${window.debugCounter}: hasClient=${hasClient}, isCorrectType=${isCorrectType}, hasRequiredMethods=${hasRequiredMethods}`);
-            if (hasClient) {
-              console.log('Client found!', window.MediaSoupVTT_Client);
-            }
-          }
-          
-          return hasClient && isCorrectType && hasRequiredMethods;
-        },
-        { timeout: 30000 }
-      );
+      await waitForClientWithRetry(page);
     } catch (timeoutError) {
       // If timeout, gather detailed debug information
       const finalDebugInfo = await page.evaluate(() => ({
@@ -190,8 +214,9 @@ test.describe('MediaSoup Plugin Loading', () => {
     // Wait a bit more for status update
     await page.waitForTimeout(500);
     
-    // Check plugin status
-    await expect(page.locator('#test-status')).toContainText('Plugin initialized', { timeout: 10000 });
+    // Check plugin status with CI-aware timeout
+    const statusTimeout = process.env.CI ? 30000 : 10000;
+    await expect(page.locator('#test-status')).toContainText('Plugin initialized', { timeout: statusTimeout });
     
     // Verify client instance is created with more detailed checks
     const clientInfo = await page.evaluate(() => ({
@@ -215,7 +240,7 @@ test.describe('MediaSoup Plugin Loading', () => {
   test('should register settings correctly', async () => {
     // Initialize plugin
     await page.click('#btn-init-plugin');
-    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    await waitForClientWithRetry(page);
     
     // Get registered settings
     const settings = await page.evaluate(() => {
@@ -249,7 +274,7 @@ test.describe('MediaSoup Plugin Loading', () => {
   test('should register settings menu correctly', async () => {
     // Initialize plugin
     await page.click('#btn-init-plugin');
-    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    await waitForClientWithRetry(page);
     
     // Get registered menus
     const menus = await page.evaluate(() => {
@@ -278,7 +303,7 @@ test.describe('MediaSoup Plugin Loading', () => {
     
     // Initialize plugin
     await page.click('#btn-init-plugin');
-    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    await waitForClientWithRetry(page);
     
     // Wait for lifecycle to complete
     await page.waitForTimeout(1000);
@@ -297,7 +322,7 @@ test.describe('MediaSoup Plugin Loading', () => {
     
     // Initialize plugin
     await page.click('#btn-init-plugin');
-    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    await waitForClientWithRetry(page);
     
     // Wait for notifications
     await page.waitForTimeout(2000);
@@ -326,7 +351,7 @@ test.describe('MediaSoup Plugin Loading', () => {
     
     // Initialize plugin
     await page.click('#btn-init-plugin');
-    await page.waitForFunction(() => window.MediaSoupVTT_Client);
+    await waitForClientWithRetry(page);
     
     // Wait for logs
     await page.waitForTimeout(1000);
@@ -346,8 +371,9 @@ test.describe('MediaSoup Plugin Loading', () => {
     // Initialize plugin
     await page.click('#btn-init-plugin');
     
-    // Should show error status due to loading failure
-    await expect(page.locator('#test-status')).toContainText('Plugin load failed', { timeout: 10000 });
+    // Should show error status due to loading failure with CI-aware timeout
+    const errorTimeout = process.env.CI ? 30000 : 10000;
+    await expect(page.locator('#test-status')).toContainText('Plugin load failed', { timeout: errorTimeout });
     
     // Should have logged the error
     const logEntries = await page.locator('.test-log .log-entry.error').count();

@@ -47,11 +47,11 @@ export default defineConfig({
     /* Capture video on failure */
     video: 'retain-on-failure',
     
-    /* Global timeout for each test */
-    actionTimeout: 30000,
+    /* Action timeout - increase for CI environment */
+    actionTimeout: process.env.CI ? 60000 : 30000, // 60s in CI, 30s locally
     
-    /* Navigation timeout */
-    navigationTimeout: 30000,
+    /* Navigation timeout - increase for CI environment */
+    navigationTimeout: process.env.CI ? 60000 : 30000, // 60s in CI, 30s locally
   },
 
   /* Configure projects for major browsers */
@@ -60,7 +60,7 @@ export default defineConfig({
       name: 'chromium-webrtc',
       use: { 
         ...devices['Desktop Chrome'],
-        // Minimal Chrome flags for basic testing
+        // Chrome flags for testing with CI-specific optimizations
         launchOptions: {
           args: [
             // Essential testing flags
@@ -70,6 +70,19 @@ export default defineConfig({
             '--use-fake-ui-for-media-stream',
             '--use-fake-device-for-media-stream',
             '--allow-running-insecure-content',
+            // CI environment optimizations
+            ...(process.env.CI ? [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-background-timer-throttling',
+              '--disable-backgrounding-occluded-windows',
+              '--disable-renderer-backgrounding',
+              '--disable-features=TranslateUI',
+              '--disable-ipc-flooding-protection',
+              '--memory-pressure-off',
+              '--max_old_space_size=4096',
+            ] : []),
           ],
         },
         
@@ -93,7 +106,8 @@ export default defineConfig({
             'media.navigator.permission.disabled': true,
           }
         },
-        permissions: ['camera', 'microphone'],
+        // Firefox doesn't support camera/microphone permissions in this context
+        // Using firefoxUserPrefs instead to handle media access
       },
     },
   ],
@@ -102,12 +116,12 @@ export default defineConfig({
   globalSetup: './tests/integration/setup/global-setup.js',
   globalTeardown: './tests/integration/setup/global-teardown.js',
   
-  /* Test timeout */
-  timeout: 60000, // 1 minute per test
+  /* Test timeout - increase for CI environment */
+  timeout: process.env.CI ? 120000 : 60000, // 2 minutes in CI, 1 minute locally
   
-  /* Expect timeout */
+  /* Expect timeout - increase for CI environment */
   expect: {
-    timeout: 15000,
+    timeout: process.env.CI ? 30000 : 15000, // 30s in CI, 15s locally
   },
   
   /* Test file patterns */
