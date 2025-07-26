@@ -63,49 +63,24 @@ export default defineConfig({
         // Chrome flags for testing with CI and OS-specific optimizations
         launchOptions: {
           args: [
-            // Essential testing flags
+            // Essential testing flags only
             '--disable-web-security',
             '--allow-file-access-from-files',
-            // Enable fake media devices for testing
             '--use-fake-ui-for-media-stream',
             '--use-fake-device-for-media-stream',
             '--allow-running-insecure-content',
-            // CI environment optimizations
+            // Minimal CI flags to prevent browser crashes
             ...(process.env.CI ? [
               '--no-sandbox',
-              '--disable-setuid-sandbox',
+              '--disable-setuid-sandbox', 
               '--disable-dev-shm-usage',
-              '--disable-background-timer-throttling',
-              '--disable-backgrounding-occluded-windows',
-              '--disable-renderer-backgrounding',
-              '--disable-features=TranslateUI,VizDisplayCompositor',
-              '--disable-ipc-flooding-protection',
-              '--memory-pressure-off',
-              '--max_old_space_size=4096',
               '--disable-extensions',
               '--disable-plugins',
-              '--disable-default-apps',
-              '--disable-background-networking',
-              '--disable-sync',
-              '--disable-translate',
-              '--hide-scrollbars',
-              '--mute-audio',
               '--no-first-run',
-              '--disable-gpu-sandbox',
-              '--single-process',
-              '--disable-web-security',
-              // macOS specific optimizations
-              ...(process.platform === 'darwin' ? [
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--no-zygote',
-              ] : []),
-              // Windows specific optimizations  
+              '--mute-audio',
+              // OS-specific minimal flags
               ...(process.platform === 'win32' ? [
                 '--disable-gpu',
-                '--disable-software-rasterizer',
-                '--disable-background-timer-throttling',
-                '--disable-renderer-backgrounding',
               ] : []),
             ] : []),
           ],
@@ -135,37 +110,18 @@ export default defineConfig({
           firefoxUserPrefs: {
             'media.navigator.streams.fake': true,
             'media.navigator.permission.disabled': true,
-            // Enhanced Firefox settings for CI stability
+            // Minimal Firefox settings for CI stability
             ...(process.env.CI ? {
               'dom.webnotifications.enabled': false,
-              'dom.push.enabled': false,
-              'browser.startup.homepage': 'about:blank',
-              'browser.newtabpage.enabled': false,
               'browser.shell.checkDefaultBrowser': false,
               'browser.tabs.warnOnClose': false,
-              'browser.sessionstore.resume_from_crash': false,
-              'toolkit.telemetry.enabled': false,
-              'datareporting.healthreport.service.enabled': false,
-              'datareporting.healthreport.uploadEnabled': false,
             } : {}),
           },
-          // Firefox-specific args for CI
+          // Minimal Firefox args for CI
           args: process.env.CI ? [
             '--no-remote',
-            '--disable-background-networking',
-            '--disable-default-browser-check',
-            '--disable-dev-shm-usage',
             '--disable-extensions',
-            '--disable-features=TranslateUI',
-            '--disable-hang-monitor',
-            '--disable-ipc-flooding-protection',
-            '--disable-popup-blocking',
-            '--disable-prompt-on-repost',
-            '--disable-sync',
-            '--disable-translate',
-            '--metrics-recording-only',
             '--no-first-run',
-            '--safebrowsing-disable-auto-update',
           ] : [],
         },
         // Firefox doesn't support camera/microphone permissions in this context

@@ -59,25 +59,42 @@ async function waitForClientWithRetry(page, options = {}) {
       return result;
       
     } catch (error) {
+      // Check if browser/page is still alive before retrying
+      const isBrowserClosed = error.message.includes('Target page, context or browser has been closed') ||
+                              error.message.includes('browser has been closed') ||
+                              page.isClosed();
+      
+      if (isBrowserClosed) {
+        console.error(`[Browser Closed] Browser crashed during attempt ${attempt + 1}. Error: ${error.message}`);
+        throw new Error(`Browser crashed during waitForClientWithRetry. This suggests browser instability in CI.`);
+      }
+      
       if (attempt === maxRetries - 1) {
-        // Final attempt failed - gather comprehensive debug info
-        const debugInfo = await page.evaluate(() => ({
-          hasClient: !!window.MediaSoupVTT_Client,
-          clientType: window.MediaSoupVTT_Client?.constructor?.name,
-          hasMediasoup: !!window.mediasoupClient,
-          mediasoupVersion: window.mediasoupClient?.version,
-          hasGame: !!window.game,
-          gameVersion: window.game?.version,
-          hasUI: !!window.ui,
-          hasHooks: !!window.Hooks,
-          hooksCalled: window.testHookCalls || [],
-          isInitialized: window.isInitialized,
-          testLogs: window.testLogs || [],
-          testErrors: window.testErrors || [],
-          windowKeys: Object.keys(window).filter(k => k.includes('MediaSoup') || k.includes('mediasoup')),
-          documentReadyState: document.readyState,
-          timestamp: Date.now()
-        }));
+        // Final attempt failed - gather comprehensive debug info if page is still alive
+        let debugInfo = null;
+        try {
+          if (!page.isClosed()) {
+            debugInfo = await page.evaluate(() => ({
+              hasClient: !!window.MediaSoupVTT_Client,
+              clientType: window.MediaSoupVTT_Client?.constructor?.name,
+              hasMediasoup: !!window.mediasoupClient,
+              mediasoupVersion: window.mediasoupClient?.version,
+              hasGame: !!window.game,
+              gameVersion: window.game?.version,
+              hasUI: !!window.ui,
+              hasHooks: !!window.Hooks,
+              hooksCalled: window.testHookCalls || [],
+              isInitialized: window.isInitialized,
+              testLogs: window.testLogs || [],
+              testErrors: window.testErrors || [],
+              windowKeys: Object.keys(window).filter(k => k.includes('MediaSoup') || k.includes('mediasoup')),
+              documentReadyState: document.readyState,
+              timestamp: Date.now()
+            }));
+          }
+        } catch (evalError) {
+          console.warn(`[Debug Info Failed] Could not gather debug info: ${evalError.message}`);
+        }
         
         console.error(`[Final Retry Failed] Debug info:`, debugInfo);
         throw new Error(`waitForClientWithRetry failed after ${maxRetries} attempts. Last error: ${error.message}`);
@@ -85,9 +102,11 @@ async function waitForClientWithRetry(page, options = {}) {
       
       console.warn(`[Retry ${attempt + 1}/${maxRetries}] Failed: ${error.message}. Retrying...`);
       
-      // Brief pause before retry with exponential backoff
-      const retryDelay = isCI ? 2000 * Math.pow(1.3, attempt) : 1000;
-      await page.waitForTimeout(retryDelay);
+      // Brief pause before retry with exponential backoff - but only if page is still alive
+      if (!page.isClosed()) {
+        const retryDelay = isCI ? 2000 * Math.pow(1.3, attempt) : 1000;
+        await page.waitForTimeout(retryDelay);
+      }
     }
   }
 }
@@ -248,16 +267,25 @@ test.describe('MediaSoup Plugin Loading', () => {
     try {
       await waitForClientWithRetry(page);
     } catch (timeoutError) {
-      // If timeout, gather detailed debug information
-      const finalDebugInfo = await page.evaluate(() => ({
-        logs: window.testLogs || [],
-        errors: window.testErrors || [],
-        hasClient: !!window.MediaSoupVTT_Client,
-        clientType: window.MediaSoupVTT_Client?.constructor?.name,
-        isInitialized: window.isInitialized,
-        allGlobals: Object.keys(window).filter(k => k.startsWith('MediaSoup') || k.includes('mediasoup')),
-        hookCalls: window.testHookCalls || []
-      }));
+      // If timeout, gather detailed debug information - but only if browser is still alive
+      let finalDebugInfo = null;
+      try {
+        if (!page.isClosed()) {
+          finalDebugInfo = await page.evaluate(() => ({
+            logs: window.testLogs || [],
+            errors: window.testErrors || [],
+            hasClient: !!window.MediaSoupVTT_Client,
+            clientType: window.MediaSoupVTT_Client?.constructor?.name,
+            isInitialized: window.isInitialized,
+            allGlobals: Object.keys(window).filter(k => k.startsWith('MediaSoup') || k.includes('mediasoup')),
+            hookCalls: window.testHookCalls || []
+          }));
+        } else {
+          finalDebugInfo = { error: "Browser/page was closed, cannot gather debug info" };
+        }
+      } catch (evalError) {
+        finalDebugInfo = { error: `Failed to gather debug info: ${evalError.message}` };
+      }
       
       console.log('=== TIMEOUT DEBUG INFO ===');
       console.log('Console logs:', logs.slice(-20)); // Last 20 logs
