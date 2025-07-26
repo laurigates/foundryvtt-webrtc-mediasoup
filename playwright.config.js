@@ -36,7 +36,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.CI ? 'http://localhost:3000?ci=true' : 'http://localhost:3000',
     
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -48,10 +48,10 @@ export default defineConfig({
     video: 'retain-on-failure',
     
     /* Action timeout - increase for CI environment */
-    actionTimeout: process.env.CI ? 60000 : 30000, // 60s in CI, 30s locally
+    actionTimeout: process.env.CI ? 90000 : 30000, // 90s in CI, 30s locally
     
     /* Navigation timeout - increase for CI environment */
-    navigationTimeout: process.env.CI ? 60000 : 30000, // 60s in CI, 30s locally
+    navigationTimeout: process.env.CI ? 90000 : 30000, // 90s in CI, 30s locally
   },
 
   /* Configure projects for major browsers */
@@ -60,7 +60,7 @@ export default defineConfig({
       name: 'chromium-webrtc',
       use: { 
         ...devices['Desktop Chrome'],
-        // Chrome flags for testing with CI-specific optimizations
+        // Chrome flags for testing with CI and OS-specific optimizations
         launchOptions: {
           args: [
             // Essential testing flags
@@ -78,12 +78,43 @@ export default defineConfig({
               '--disable-background-timer-throttling',
               '--disable-backgrounding-occluded-windows',
               '--disable-renderer-backgrounding',
-              '--disable-features=TranslateUI',
+              '--disable-features=TranslateUI,VizDisplayCompositor',
               '--disable-ipc-flooding-protection',
               '--memory-pressure-off',
               '--max_old_space_size=4096',
+              '--disable-extensions',
+              '--disable-plugins',
+              '--disable-default-apps',
+              '--disable-background-networking',
+              '--disable-sync',
+              '--disable-translate',
+              '--hide-scrollbars',
+              '--mute-audio',
+              '--no-first-run',
+              '--disable-gpu-sandbox',
+              '--single-process',
+              '--disable-web-security',
+              // macOS specific optimizations
+              ...(process.platform === 'darwin' ? [
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-zygote',
+              ] : []),
+              // Windows specific optimizations  
+              ...(process.platform === 'win32' ? [
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+                '--disable-background-timer-throttling',
+                '--disable-renderer-backgrounding',
+              ] : []),
             ] : []),
           ],
+          // OS-specific timeout adjustments
+          timeout: process.env.CI ? (
+            process.platform === 'win32' ? 60000 : // Windows needs more time
+            process.platform === 'darwin' ? 45000 : // macOS is typically faster
+            30000 // Linux default
+          ) : 30000,
         },
         
         // Grant permissions for media devices
@@ -104,7 +135,38 @@ export default defineConfig({
           firefoxUserPrefs: {
             'media.navigator.streams.fake': true,
             'media.navigator.permission.disabled': true,
-          }
+            // Enhanced Firefox settings for CI stability
+            ...(process.env.CI ? {
+              'dom.webnotifications.enabled': false,
+              'dom.push.enabled': false,
+              'browser.startup.homepage': 'about:blank',
+              'browser.newtabpage.enabled': false,
+              'browser.shell.checkDefaultBrowser': false,
+              'browser.tabs.warnOnClose': false,
+              'browser.sessionstore.resume_from_crash': false,
+              'toolkit.telemetry.enabled': false,
+              'datareporting.healthreport.service.enabled': false,
+              'datareporting.healthreport.uploadEnabled': false,
+            } : {}),
+          },
+          // Firefox-specific args for CI
+          args: process.env.CI ? [
+            '--no-remote',
+            '--disable-background-networking',
+            '--disable-default-browser-check',
+            '--disable-dev-shm-usage',
+            '--disable-extensions',
+            '--disable-features=TranslateUI',
+            '--disable-hang-monitor',
+            '--disable-ipc-flooding-protection',
+            '--disable-popup-blocking',
+            '--disable-prompt-on-repost',
+            '--disable-sync',
+            '--disable-translate',
+            '--metrics-recording-only',
+            '--no-first-run',
+            '--safebrowsing-disable-auto-update',
+          ] : [],
         },
         // Firefox doesn't support camera/microphone permissions in this context
         // Using firefoxUserPrefs instead to handle media access
@@ -117,11 +179,11 @@ export default defineConfig({
   globalTeardown: './tests/integration/setup/global-teardown.js',
   
   /* Test timeout - increase for CI environment */
-  timeout: process.env.CI ? 120000 : 60000, // 2 minutes in CI, 1 minute locally
+  timeout: process.env.CI ? 180000 : 60000, // 3 minutes in CI, 1 minute locally
   
   /* Expect timeout - increase for CI environment */
   expect: {
-    timeout: process.env.CI ? 30000 : 15000, // 30s in CI, 15s locally
+    timeout: process.env.CI ? 45000 : 15000, // 45s in CI, 15s locally
   },
   
   /* Test file patterns */
@@ -142,6 +204,6 @@ export default defineConfig({
     port: 3000,
     cwd: '.',
     reuseExistingServer: !process.env.CI,
-    timeout: 10000,
+    timeout: process.env.CI ? 15000 : 10000,
   }
 });

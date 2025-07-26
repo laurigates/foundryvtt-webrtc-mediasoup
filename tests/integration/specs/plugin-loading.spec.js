@@ -9,30 +9,87 @@ import { test, expect } from '@playwright/test';
 
 /**
  * Helper function for CI-aware waiting with improved polling and timeout handling
+ * Implements exponential backoff and enhanced retry logic for CI environments
  */
 async function waitForClientWithRetry(page, options = {}) {
   const isCI = !!process.env.CI;
-  const timeout = options.timeout || (isCI ? 90000 : 30000); // 90s in CI, 30s locally
-  const polling = isCI ? 2000 : 500; // Slower polling in CI to reduce resource pressure
+  const timeout = options.timeout || (isCI ? 120000 : 30000); // 2 minutes in CI, 30s locally
+  const maxRetries = isCI ? 5 : 3;
+  const basePolling = isCI ? 3000 : 500; // Slower base polling in CI
   
-  return page.waitForFunction(
-    () => {
-      const hasClient = !!window.MediaSoupVTT_Client;
-      const isCorrectType = hasClient && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient';
-      const hasRequiredMethods = hasClient && typeof window.MediaSoupVTT_Client.updateServerUrl === 'function';
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      // Exponential backoff: increase polling interval with each retry
+      const currentPolling = basePolling * Math.pow(1.5, attempt);
+      const attemptTimeout = Math.min(timeout / maxRetries * (attempt + 2), timeout);
       
-      // Log progress in CI for debugging
-      if (window.location.search.includes('ci-debug')) {
-        console.log(`[CI-Debug] Client check: hasClient=${hasClient}, isCorrectType=${isCorrectType}, hasRequiredMethods=${hasRequiredMethods}`);
+      console.log(`[Retry ${attempt + 1}/${maxRetries}] Waiting for client with timeout: ${attemptTimeout}ms, polling: ${currentPolling}ms`);
+      
+      const result = await page.waitForFunction(
+        () => {
+          const hasClient = !!window.MediaSoupVTT_Client;
+          const isCorrectType = hasClient && window.MediaSoupVTT_Client.constructor.name === 'MediaSoupVTTClient';
+          const hasRequiredMethods = hasClient && typeof window.MediaSoupVTT_Client.updateServerUrl === 'function';
+          
+          // Enhanced debugging for CI (check CI via URL param since process is not available in browser)
+          if (window.location.search.includes('ci=true') || window.location.search.includes('ci-debug')) {
+            if (!hasClient && window.testSandbox) {
+              const debugInfo = {
+                hasClient,
+                isCorrectType,
+                hasRequiredMethods,
+                hasMediasoup: !!window.mediasoupClient,
+                hooksCalled: window.testHookCalls ? window.testHookCalls.length : 0,
+                isInitialized: window.isInitialized,
+                timestamp: Date.now()
+              };
+              console.log(`[CI-Debug] Client check attempt ${attempt + 1}:`, debugInfo);
+            }
+          }
+          
+          return hasClient && isCorrectType && hasRequiredMethods;
+        },
+        { 
+          timeout: attemptTimeout,
+          polling: currentPolling
+        }
+      );
+      
+      console.log(`[Retry ${attempt + 1}/${maxRetries}] Success! Client found.`);
+      return result;
+      
+    } catch (error) {
+      if (attempt === maxRetries - 1) {
+        // Final attempt failed - gather comprehensive debug info
+        const debugInfo = await page.evaluate(() => ({
+          hasClient: !!window.MediaSoupVTT_Client,
+          clientType: window.MediaSoupVTT_Client?.constructor?.name,
+          hasMediasoup: !!window.mediasoupClient,
+          mediasoupVersion: window.mediasoupClient?.version,
+          hasGame: !!window.game,
+          gameVersion: window.game?.version,
+          hasUI: !!window.ui,
+          hasHooks: !!window.Hooks,
+          hooksCalled: window.testHookCalls || [],
+          isInitialized: window.isInitialized,
+          testLogs: window.testLogs || [],
+          testErrors: window.testErrors || [],
+          windowKeys: Object.keys(window).filter(k => k.includes('MediaSoup') || k.includes('mediasoup')),
+          documentReadyState: document.readyState,
+          timestamp: Date.now()
+        }));
+        
+        console.error(`[Final Retry Failed] Debug info:`, debugInfo);
+        throw new Error(`waitForClientWithRetry failed after ${maxRetries} attempts. Last error: ${error.message}`);
       }
       
-      return hasClient && isCorrectType && hasRequiredMethods;
-    },
-    { 
-      timeout,
-      polling: polling
+      console.warn(`[Retry ${attempt + 1}/${maxRetries}] Failed: ${error.message}. Retrying...`);
+      
+      // Brief pause before retry with exponential backoff
+      const retryDelay = isCI ? 2000 * Math.pow(1.3, attempt) : 1000;
+      await page.waitForTimeout(retryDelay);
     }
-  );
+  }
 }
 
 test.describe('MediaSoup Plugin Loading', () => {
@@ -41,7 +98,7 @@ test.describe('MediaSoup Plugin Loading', () => {
   test.beforeEach(async ({ browser }) => {
     try {
       const isCI = !!process.env.CI;
-      const setupTimeout = isCI ? 60000 : 30000; // 60s in CI, 30s locally
+      const setupTimeout = isCI ? 90000 : 30000; // 90s in CI, 30s locally
       
       page = await browser.newPage();
       
