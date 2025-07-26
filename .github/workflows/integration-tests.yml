@@ -65,6 +65,9 @@ jobs:
     - name: Build plugin
       run: npm run build
       
+    - name: Build test plugin
+      run: npm run build:test
+      
     - name: Install Playwright browsers
       run: npx playwright install --with-deps ${{ matrix.browser }}
       
@@ -194,10 +197,14 @@ jobs:
     - name: Build plugin
       run: npm run build
       
+    - name: Build test plugin
+      run: npm run build:test
+      
     - name: Verify build output
       run: |
         test -f dist/mediasoup-vtt.js
         test -f dist/module.json
+        test -f dist/mediasoup-vtt-test.js
         
     - name: Install Playwright (Chromium only for smoke test)
       run: npx playwright install chromium
